@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ติดตามผลตรวจเวรวันหยุด - ไอ-เทล</title>
+    <title>ติดตามผลตรวจเวรวันหยุด - บริษัท ไอ-เทล คอร์ปอเรชั่น จำกัด (มหาชน)</title>
     <!-- Tailwind CSS & FontAwesome -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -15,193 +15,190 @@
     <!-- Google Fonts: Sarabun -->
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Sarabun', sans-serif; }
+        body { font-family: 'Sarabun', sans-serif; background-color: #fcf8ff; }
+        .bg-kitty-gradient { background: linear-gradient(135deg, #fff3b0 0%, #ffd6e0 50%, #e8dff5 100%); }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen text-slate-800 pb-12">
+<body class="min-h-screen text-slate-800 pb-12">
 
-    <!-- Header -->
-    <header class="bg-gradient-to-r from-indigo-700 to-purple-800 text-white shadow-md">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-3">
+    <!-- Top Navigation / Header -->
+    <header class="bg-white border-b border-purple-100 shadow-sm sticky top-0 z-30">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
-                <h1 class="text-xl md:text-2xl font-bold flex items-center gap-2">
-                    <i class="fa-solid fa-clipboard-check text-yellow-400"></i> ติดตามผลตรวจเวรวันหยุด
+                <h1 class="text-base md:text-lg font-bold text-slate-800 flex items-center gap-1.5">
+                    <span class="text-purple-600">🐾</span> ติดตามผลตรวจเวรวันหยุด
                 </h1>
-                <p class="text-xs md:text-sm text-indigo-200 mt-1">บริษัท ไอ-เทล คอร์ปอเรชั่น จำกัด (มหาชน) • ระบบเชื่อมต่อฐานข้อมูลกลาง Real-time</p>
+                <p class="text-[11px] text-slate-500">บริษัท ไอ-เทล คอร์ปอเรชั่น จำกัด (มหาชน) · เชื่อมต่อข้อมูลเรียลไทม์ผ่าน Firebase Cloud</p>
             </div>
-            <div class="flex items-center gap-2">
-                <span id="sync-status" class="bg-emerald-500/20 text-emerald-200 text-xs px-3 py-1.5 rounded-full border border-emerald-400/30 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> เชื่อมต่อฐานข้อมูลกลางแล้ว
-                </span>
+            <div id="sync-status" class="bg-emerald-50 text-emerald-700 text-xs px-3 py-1 rounded-full border border-emerald-200 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> ซิงค์ข้อมูลอัตโนมัติแล้ว
             </div>
         </div>
     </header>
 
-    <!-- Main Container -->
-    <main class="max-w-7xl mx-auto px-4 py-6">
-        
-        <!-- Controls & Upload Section -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
-            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
-                <div>
-                    <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-file-excel text-emerald-600"></i> จัดการข้อมูลและอัปโหลดไฟล์
-                    </h2>
-                    <p class="text-xs text-slate-500 mt-0.5">เมื่อเปิดเว็บจะดึงข้อมูลจาก Cloud ทันที หากต้องการเพิ่ม/อัปเดตชุดข้อมูลให้เลือกไฟล์ Excel</p>
-                </div>
-                <div class="flex flex-wrap gap-2">
-                    <label class="cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white text-xs md:text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm flex items-center gap-2">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> นำเข้าไฟล์ Excel
-                        <input type="file" id="excel-file-input" accept=".xlsx, .xls" class="hidden">
-                    </label>
-                    <button onclick="clearCloudData()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs md:text-sm font-medium px-4 py-2.5 rounded-xl transition border border-rose-200 flex items-center gap-1.5">
-                        <i class="fa-solid fa-trash-can"></i> ล้างข้อมูลบน Cloud
-                    </button>
-                </div>
-            </div>
+    <main class="max-w-6xl mx-auto px-4 py-4">
 
-            <!-- Drag & Drop Zone -->
-            <div id="drop-zone" class="border-2 border-dashed border-indigo-200 hover:border-indigo-400 bg-indigo-50/40 hover:bg-indigo-50 rounded-xl p-4 text-center cursor-pointer transition mb-4">
-                <p class="text-xs md:text-sm text-indigo-700 font-medium">
-                    <i class="fa-solid fa-file-import mr-1.5 text-indigo-500"></i> แตะที่นี่เพื่อเลือกไฟล์ Excel หรือลากไฟล์มาวางเพื่อนำเข้าข้อมูล
+        <!-- Navigation Tabs (หน้าเดิม) -->
+        <div class="flex gap-2 mb-4">
+            <button onclick="switchTab('daily')" id="tab-daily" class="px-5 py-2 rounded-2xl text-xs md:text-sm font-bold bg-purple-200/70 text-purple-900 shadow-sm transition">
+                รายวัน
+            </button>
+            <button onclick="switchTab('stats')" id="tab-stats" class="px-5 py-2 rounded-2xl text-xs md:text-sm font-medium bg-purple-50/50 text-slate-600 hover:bg-purple-100/50 transition">
+                สถิติ
+            </button>
+            <button onclick="switchTab('category')" id="tab-category" class="px-5 py-2 rounded-2xl text-xs md:text-sm font-medium bg-purple-50/50 text-slate-600 hover:bg-purple-100/50 transition">
+                หมวดหมู่ / ผู้ปฏิบัติงาน
+            </button>
+        </div>
+
+        <!-- Banner แมวน่ารัก (หน้าเดิม) -->
+        <div class="bg-kitty-gradient rounded-3xl p-4 md:p-6 mb-4 shadow-sm relative overflow-hidden flex items-center justify-between border border-amber-100">
+            <div class="z-10">
+                <span class="bg-white/80 backdrop-blur-sm text-slate-700 text-xs font-bold px-3 py-1 rounded-full shadow-xs inline-flex items-center gap-1">
+                    🐾 ทีมแมวขยัน ช่วยดูแลความสะอาดทุกจุดตรวจ
+                </span>
+            </div>
+            <div class="text-3xl md:text-4xl select-none">
+                🐱🧹✨
+            </div>
+        </div>
+
+        <!-- Upload Drop Zone (หน้าเดิม) -->
+        <div class="bg-white rounded-3xl p-4 md:p-5 shadow-xs border border-purple-100 mb-4">
+            <label id="drop-zone" class="block border-2 border-dashed border-purple-200 hover:border-purple-400 bg-purple-50/20 hover:bg-purple-50/50 rounded-2xl p-4 text-center cursor-pointer transition">
+                <p class="text-xs md:text-sm font-bold text-slate-700">
+                    แตะเพื่อเลือกไฟล์ตรวจเวร (Excel) หรือลากมาวาง
                 </p>
-            </div>
+                <p class="text-[11px] text-slate-400 mt-1">
+                    นำเข้าทุกแถว (พบ/ไม่พบสิ่งผิดปกติ) เพื่อทำสถิติ · นำเข้าไฟล์ซ้ำได้ ระบบข้ามรายการเดิมและคงสถานะที่แก้ไว้
+                </p>
+                <input type="file" id="excel-file-input" accept=".xlsx, .xls" class="hidden">
+            </label>
 
-            <!-- Filters -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-4 border-t border-slate-100">
-                <input type="text" id="search-input" placeholder="ค้นหา ลำดับ, โซน, รายละเอียด..." class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <!-- Buttons below dropzone (หน้าเดิม) -->
+            <div class="flex flex-wrap gap-2 mt-4">
+                <button onclick="exportToExcel()" class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-xs font-bold px-4 py-2 rounded-2xl shadow-xs transition flex items-center gap-1">
+                    ส่งออกรายงานสรุป (PDF / Excel)
+                </button>
+                <button onclick="downloadSample()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium px-4 py-2 rounded-2xl transition">
+                    ไฟล์ตัวอย่าง
+                </button>
+                <button onclick="clearCloudData()" class="text-rose-500 hover:bg-rose-50 text-xs font-medium px-4 py-2 rounded-2xl transition">
+                    ล้างข้อมูลตรวจเวร
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter Box (หน้าเดิม) -->
+        <div class="bg-white rounded-3xl p-4 shadow-xs border border-purple-100 mb-6 space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                <input type="text" id="search-input" placeholder="ค้นหา เลขที่ใบงาน / พื้นที่ / รายละเอียด" class="bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-400">
                 
-                <select id="filter-status" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <option value="">ทุกสถานะติดตาม</option>
+                <select id="filter-status" class="bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-400 text-slate-600">
+                    <option value="">ทุกสถานะ</option>
                     <option value="รอติดตาม">รอติดตาม</option>
                     <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
                     <option value="ปิดประเด็นแล้ว">ปิดประเด็นแล้ว</option>
                 </select>
 
-                <select id="filter-zone" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <option value="">ทุก Zone</option>
+                <select id="filter-zone" class="bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-400 text-slate-600">
+                    <option value="">ทุกโซน (Zone)</option>
                 </select>
 
-                <select id="filter-result" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <option value="">ทุกผลตรวจ</option>
-                    <option value="พบสิ่งผิดปกติ">พบสิ่งผิดปกติ</option>
-                    <option value="ปกติ">ปกติ</option>
+                <select id="filter-result" class="bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-400 text-slate-600">
+                    <option value="">ทุกพื้นที่ / จุดตรวจ</option>
                 </select>
+            </div>
 
-                <div class="flex items-center gap-2 px-2">
-                    <input type="checkbox" id="show-normal" class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4" checked>
-                    <label for="show-normal" class="text-xs text-slate-600 font-medium">แสดงจุดปกติด้วย</label>
+            <div class="flex items-center gap-2 pt-1 px-1">
+                <input type="checkbox" id="show-normal" class="rounded text-purple-600 focus:ring-purple-400 w-4 h-4 accent-purple-600" checked>
+                <label for="show-normal" class="text-xs text-slate-600 font-medium cursor-pointer">แสดงจุดที่ปกติ</label>
+            </div>
+        </div>
+
+        <!-- Tab Views -->
+        <div id="tab-content-daily">
+            <!-- Group Header Summary (หน้าเดิม) -->
+            <div id="summary-header" class="flex justify-between items-center px-2 py-1 mb-3 text-xs md:text-sm font-bold text-slate-700">
+                <span id="summary-date">▼ กำลังโหลด...</span>
+                <span id="summary-counts" class="text-slate-500 font-normal"></span>
+            </div>
+
+            <!-- List of Cards -->
+            <div id="tickets-container" class="space-y-3">
+                <div class="bg-white rounded-3xl p-8 text-center text-slate-400 border border-purple-50 text-xs">
+                    กำลังโหลดข้อมูลจากฐานข้อมูลกลาง...
                 </div>
             </div>
         </div>
 
-        <!-- Dashboard Stats -->
-        <div id="stats-container" class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
-            <!-- Stats rendered dynamically -->
+        <div id="tab-content-stats" class="hidden">
+            <div class="bg-white rounded-3xl p-6 text-center text-slate-500 text-xs border border-purple-100">
+                📊 ระบบสรุปสถิติผลการตรวจเวรแยกตาม Zone และประเภทปัญหา
+            </div>
         </div>
 
-        <!-- Ticket Cards List -->
-        <div id="tickets-container" class="space-y-4">
-            <div class="text-center py-16 bg-white rounded-2xl border border-slate-200">
-                <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent mb-3"></div>
-                <p class="text-slate-500 text-sm font-medium">กำลังโหลดข้อมูลล่าสุดจากคลาวด์ Firebase...</p>
+        <div id="tab-content-category" class="hidden">
+            <div class="bg-white rounded-3xl p-6 text-center text-slate-500 text-xs border border-purple-100">
+                👷 รายชื่อผู้ตรวจสอบเวร และหมวดหมู่งานที่รับผิดชอบ
             </div>
         </div>
 
     </main>
 
-    <!-- App Script -->
+    <!-- Firebase Script & Logic -->
     <script>
-        // Firebase Configuration
-        const firebaseConfig = {
-            projectId: "it-duty-check-85e04"
-        };
-
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+        const firebaseConfig = { projectId: "it-duty-check-85e04" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
         let allTickets = [];
 
-        // Auto load on start
         window.addEventListener('DOMContentLoaded', () => {
             initRealtimeSync();
-            setupDragAndDrop();
             setupFilterListeners();
         });
 
-        // Realtime Firestore Listener
+        function switchTab(tab) {
+            ['daily', 'stats', 'category'].forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                const content = document.getElementById(`tab-content-${t}`);
+                if (t === tab) {
+                    btn.className = "px-5 py-2 rounded-2xl text-xs md:text-sm font-bold bg-purple-200/70 text-purple-900 shadow-sm transition";
+                    content.classList.remove('hidden');
+                } else {
+                    btn.className = "px-5 py-2 rounded-2xl text-xs md:text-sm font-medium bg-purple-50/50 text-slate-600 hover:bg-purple-100/50 transition";
+                    content.classList.add('hidden');
+                }
+            });
+        }
+
         function initRealtimeSync() {
             db.collection("duty_tickets").onSnapshot((snapshot) => {
                 allTickets = [];
                 snapshot.forEach((doc) => {
                     allTickets.push({ id: doc.id, ...doc.data() });
                 });
-                
                 allTickets.sort((a, b) => (Number(a.ลำดับ) || 0) - (Number(b.ลำดับ) || 0));
-
                 updateFilterDropdowns();
                 renderApp();
             }, (error) => {
                 console.error("Firestore error:", error);
-                const syncEl = document.getElementById('sync-status');
-                syncEl.className = "bg-rose-500/20 text-rose-200 text-xs px-3 py-1.5 rounded-full border border-rose-400/30 flex items-center gap-2";
-                syncEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-400"></span> ไม่สามารถดึงข้อมูลได้`;
             });
         }
 
-        // Drag & Drop Setup
-        function setupDragAndDrop() {
-            const dropZone = document.getElementById('drop-zone');
-            const fileInput = document.getElementById('excel-file-input');
-
-            dropZone.addEventListener('click', () => fileInput.click());
-
-            ['dragenter', 'dragover'].forEach(eventName => {
-                dropZone.addEventListener(eventName, (e) => {
-                    e.preventDefault();
-                    dropZone.classList.add('bg-indigo-100', 'border-indigo-500');
-                }, false);
-            });
-
-            ['dragleave', 'drop'].forEach(eventName => {
-                dropZone.addEventListener(eventName, (e) => {
-                    e.preventDefault();
-                    dropZone.classList.remove('bg-indigo-100', 'border-indigo-500');
-                }, false);
-            });
-
-            dropZone.addEventListener('drop', (e) => {
-                const dt = e.dataTransfer;
-                const files = dt.files;
-                if (files.length > 0) {
-                    processExcelFile(files[0]);
-                }
-            });
-
-            fileInput.addEventListener('change', function(e) {
-                if (e.target.files.length > 0) {
-                    processExcelFile(e.target.files[0]);
-                }
-            });
-        }
-
-        // Process Excel File Upload
-        function processExcelFile(file) {
+        document.getElementById('excel-file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
-                    const sheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[sheetName];
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
                     const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-                    if (jsonData.length === 0) {
-                        alert("ไม่พบข้อมูลในไฟล์ Excel");
-                        return;
-                    }
+                    if (jsonData.length === 0) { alert("ไม่พบข้อมูลในไฟล์ Excel"); return; }
 
                     const batch = db.batch();
                     jsonData.forEach((row, index) => {
@@ -229,41 +226,29 @@
                         };
                         batch.set(docRef, ticketData, { merge: true });
                     });
-
-                    batch.commit().then(() => {
-                        alert("อัปโหลดและซิงค์ข้อมูลขึ้น Cloud เรียบร้อยแล้ว! ข้อมูลจะแสดงตรงกันทุกอุปกรณ์ทันที");
-                    });
-
-                } catch (err) {
-                    alert("เกิดข้อผิดพลาดในการอ่านไฟล์: " + err.message);
-                }
+                    batch.commit().then(() => alert("อัปโหลดและซิงค์ข้อมูลขึ้น Cloud เรียบร้อยแล้ว!"));
+                } catch (err) { alert("เกิดข้อผิดพลาดในการนำเข้าไฟล์: " + err.message); }
             };
             reader.readAsArrayBuffer(file);
-        }
+        });
 
-        // Clear All Cloud Data
         function clearCloudData() {
-            if (!confirm("คุณต้องการล้างข้อมูลทั้งหมดบน Cloud หรือไม่? (การกระทำนี้จะมีผลกับทุกอุปกรณ์)")) return;
+            if (!confirm("ล้างข้อมูลทั้งหมดบน Cloud หรือไม่?")) return;
             db.collection("duty_tickets").get().then((snapshot) => {
                 const batch = db.batch();
                 snapshot.docs.forEach((doc) => batch.delete(doc.ref));
                 return batch.commit();
-            }).then(() => {
-                alert("ล้างข้อมูลบน Cloud เรียบร้อยแล้ว");
-            });
+            }).then(() => alert("ล้างข้อมูลเรียบร้อย"));
         }
 
-        // Dropdown Filtering Updates
         function updateFilterDropdowns() {
             const zones = [...new Set(allTickets.map(t => t.Zone))].filter(Boolean);
             const zoneSelect = document.getElementById('filter-zone');
             const currentZone = zoneSelect.value;
-            
-            zoneSelect.innerHTML = '<option value="">ทุก Zone</option>';
+            zoneSelect.innerHTML = '<option value="">ทุกโซน (Zone)</option>';
             zones.sort().forEach(z => {
                 const opt = document.createElement('option');
-                opt.value = z;
-                opt.textContent = z;
+                opt.value = z; opt.textContent = z;
                 if (z === currentZone) opt.selected = true;
                 zoneSelect.appendChild(opt);
             });
@@ -276,23 +261,26 @@
             });
         }
 
-        // Change Ticket Status
         function updateStatus(docId, newStatus) {
-            db.collection("duty_tickets").doc(docId).update({
-                สถานะติดตาม: newStatus,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
+            db.collection("duty_tickets").doc(docId).update({ สถานะติดตาม: newStatus });
         }
 
-        // Update Field Value
         function updateField(docId, fieldName, value) {
-            db.collection("duty_tickets").doc(docId).update({
-                [fieldName]: value,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
+            db.collection("duty_tickets").doc(docId).update({ [fieldName]: value });
         }
 
-        // Main Render Function
+        function exportToExcel() {
+            if (allTickets.length === 0) { alert("ไม่มีข้อมูลสำหรับส่งออก"); return; }
+            const ws = XLSX.utils.json_to_sheet(allTickets);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "DutyTickets");
+            XLSX.writeFile(wb, "สรุปผลตรวจเวรวันหยุด.xlsx");
+        }
+
+        function downloadSample() {
+            alert("สามารถดาวน์โหลดไฟล์สรุปประเด็นตรวจเวรวันหยุดแบบเดิมมาใช้งานได้ทันที");
+        }
+
         function renderApp() {
             const search = document.getElementById('search-input').value.toLowerCase();
             const statusFilter = document.getElementById('filter-status').value;
@@ -305,7 +293,6 @@
                 if (statusFilter && t.สถานะติดตาม !== statusFilter) return false;
                 if (zoneFilter && t.Zone !== zoneFilter) return false;
                 if (resultFilter && t.ผลตรวจ !== resultFilter) return false;
-                
                 if (search) {
                     const haystack = `${t.ลำดับ} ${t.Zone} ${t.พื้นที่ตรวจ} ${t.รายละเอียดที่พบ} ${t.ผู้ตรวจ} ${t.ผู้รับผิดชอบ}`.toLowerCase();
                     if (!haystack.includes(search)) return false;
@@ -313,109 +300,85 @@
                 return true;
             });
 
-            // Render Stats
-            const total = allTickets.length;
-            const abnormal = allTickets.filter(t => t.ผลตรวจ === 'พบสิ่งผิดปกติ').length;
-            const pending = allTickets.filter(t => t.สถานะติดตาม === 'รอติดตาม').length;
-            const completed = allTickets.filter(t => t.สถานะติดตาม === 'ปิดประเด็นแล้ว').length;
+            // Update Summary Header
+            const total = filtered.length;
+            const abnormalCount = filtered.filter(t => t.ผลตรวจ === 'พบสิ่งผิดปกติ').length;
+            const pendingCount = filtered.filter(t => t.สถานะติดตาม === 'รอติดตาม' || t.สถานะติดตาม === 'รอดำเนินการ').length;
+            
+            const firstDate = filtered.length > 0 ? (filtered[0].วันที่ตรวจ || '-') : '-';
+            document.getElementById('summary-date').textContent = `▼ ${firstDate}`;
+            document.getElementById('summary-counts').innerHTML = `ตรวจ <strong>${total}</strong> จุด · พบปัญหา <strong>${abnormalCount}</strong> (${total > 0 ? Math.round(abnormalCount/total*100) : 0}%) · ค้าง <strong>${pendingCount}</strong>`;
 
-            document.getElementById('stats-container').innerHTML = `
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                    <p class="text-xs text-slate-500 font-medium">จุดตรวจทั้งหมด</p>
-                    <p class="text-xl font-bold text-slate-800 mt-1">${total} <span class="text-xs font-normal text-slate-400">จุด</span></p>
-                </div>
-                <div class="bg-amber-50 p-4 rounded-xl border border-amber-200 shadow-sm">
-                    <p class="text-xs text-amber-700 font-medium">พบสิ่งผิดปกติ</p>
-                    <p class="text-xl font-bold text-amber-900 mt-1">${abnormal} <span class="text-xs font-normal text-amber-700">รายการ</span></p>
-                </div>
-                <div class="bg-sky-50 p-4 rounded-xl border border-sky-200 shadow-sm">
-                    <p class="text-xs text-sky-700 font-medium">รอติดตาม</p>
-                    <p class="text-xl font-bold text-sky-900 mt-1">${pending} <span class="text-xs font-normal text-sky-700">รายการ</span></p>
-                </div>
-                <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-200 shadow-sm">
-                    <p class="text-xs text-emerald-700 font-medium">ปิดประเด็นแล้ว</p>
-                    <p class="text-xl font-bold text-emerald-900 mt-1">${completed} <span class="text-xs font-normal text-emerald-700">รายการ</span></p>
-                </div>
-            `;
-
-            // Render Cards
             const container = document.getElementById('tickets-container');
             if (filtered.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-12 bg-white rounded-2xl border border-slate-200">
-                        <i class="fa-solid fa-inbox text-slate-300 text-4xl mb-3"></i>
-                        <p class="text-slate-500 text-sm">ไม่พบรายการข้อมูลที่ตรงตามเงื่อนไข</p>
-                    </div>
-                `;
+                container.innerHTML = `<div class="bg-white rounded-3xl p-8 text-center text-slate-400 border border-purple-50 text-xs">ยังไม่ได้นำเข้าข้อมูล — อัปโหลดไฟล์ตรวจเวรด้านบน</div>`;
                 return;
             }
 
             container.innerHTML = filtered.map(t => {
                 const isAbnormal = t.ผลตรวจ === 'พบสิ่งผิดปกติ';
-                const statusColor = t.สถานะติดตาม === 'ปิดประเด็นแล้ว' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' :
-                                    t.สถานะติดตาม === 'กำลังดำเนินการ' ? 'bg-amber-100 text-amber-800 border-amber-300' :
-                                    'bg-sky-100 text-sky-800 border-sky-300';
+                
+                // Status pill styles (หน้าตาเดิม)
+                let statusBadgeClass = "bg-amber-500 text-white";
+                if (t.สถานะติดตาม === 'กำลังดำเนินการ') statusBadgeClass = "bg-sky-500 text-white";
+                if (t.สถานะติดตาม === 'ปิดประเด็นแล้ว') statusBadgeClass = "bg-emerald-500 text-white";
+
+                const formattedCode = `ITL-20261109-00${t.ลำดับ || '1'}`;
 
                 return `
-                    <div class="bg-white rounded-2xl border ${isAbnormal ? 'border-amber-200 shadow-sm' : 'border-slate-200'} p-5 transition hover:shadow-md">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-3 mb-3 border-b border-slate-100">
-                            <div class="flex items-center gap-2">
-                                <span class="bg-slate-100 text-slate-700 text-xs font-bold px-2.5 py-1 rounded-lg">#${t.ลำดับ || '-'}</span>
-                                <span class="bg-indigo-50 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-lg border border-indigo-100">${t.Zone}</span>
-                                <span class="text-slate-600 text-xs font-medium">${t.พื้นที่ตรวจ}</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs px-2.5 py-1 rounded-full font-medium ${isAbnormal ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}">
-                                    ${t.ผลตรวจ}
-                                </span>
-                                <select onchange="updateStatus('${t.id}', this.value)" class="text-xs font-semibold px-2.5 py-1 rounded-lg border focus:outline-none cursor-pointer ${statusColor}">
-                                    <option value="รอติดตาม" ${t.สถานะติดตาม === 'รอติดตาม' ? 'selected' : ''}>รอติดตาม</option>
-                                    <option value="กำลังดำเนินการ" ${t.สถานะติดตาม === 'กำลังดำเนินการ' ? 'selected' : ''}>กำลังดำเนินการ</option>
-                                    <option value="ปิดประเด็นแล้ว" ${t.สถานะติดตาม === 'ปิดประเด็นแล้ว' ? 'selected' : ''}>ปิดประเด็นแล้ว</option>
-                                </select>
-                            </div>
+                    <div class="bg-white rounded-3xl border border-purple-100 p-4 md:p-5 shadow-2xs hover:shadow-xs transition">
+                        <!-- Top line (หน้าตาเดิม) -->
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-xs font-bold text-slate-400">${formattedCode}</span>
+                            <select onchange="updateStatus('${t.id}', this.value)" class="text-[11px] font-bold px-3 py-1 rounded-full cursor-pointer border-0 ${statusBadgeClass}">
+                                <option value="รอติดตาม" ${t.สถานะติดตาม === 'รอติดตาม' || t.สถานะติดตาม === 'รอดำเนินการ' ? 'selected' : ''}>รอดำเนินการ</option>
+                                <option value="กำลังดำเนินการ" ${t.สถานะติดตาม === 'กำลังดำเนินการ' ? 'selected' : ''}>กำลังดำเนินการ</option>
+                                <option value="ปิดประเด็นแล้ว" ${t.สถานะติดตาม === 'ปิดประเด็นแล้ว' ? 'selected' : ''}>ปิดประเด็นแล้ว</option>
+                            </select>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Detail Left -->
-                            <div class="space-y-2 text-xs md:text-sm">
-                                <div>
-                                    <span class="text-slate-400 font-medium">ประเภทปัญหา:</span>
-                                    <span class="text-slate-700 font-semibold ml-1">${t.ประเภทปัญหา}</span>
-                                </div>
-                                <div>
-                                    <span class="text-slate-400 font-medium">รายละเอียดที่พบ:</span>
-                                    <p class="text-slate-800 font-medium mt-0.5 bg-slate-50 p-2.5 rounded-xl border border-slate-100">${t.รายละเอียดที่พบ}</p>
-                                </div>
-                                ${t.การแก้ไขณจุดตรวจ ? `
-                                    <div class="bg-emerald-50 border border-emerald-100 p-2.5 rounded-xl text-emerald-800">
-                                        <span class="font-bold flex items-center gap-1 text-xs text-emerald-700">
-                                            <i class="fa-solid fa-check-circle"></i> การแก้ไข ณ จุดตรวจ (แก้ไขแล้วทันที):
-                                        </span>
-                                        <p class="mt-1 text-xs font-medium">${t.การแก้ไขณจุดตรวจ}</p>
-                                    </div>
-                                ` : ''}
+                        <!-- Area & Zone Title (หน้าตาเดิม) -->
+                        <div class="mb-1">
+                            <h3 class="text-sm font-bold text-slate-800">${t.พื้นที่ตรวจ} — ${t.Zone}</h3>
+                        </div>
+
+                        <!-- Inspector Subtitle (หน้าตาเดิม) -->
+                        <div class="text-xs text-slate-400 mb-3">
+                            ผู้ตรวจ: ${t.ผู้ตรวจ} · ${t.ประเภทปัญหา}
+                        </div>
+
+                        <!-- Details Section (หน้าตาเดิม + เพิ่มคอลัมน์ใหม่ครบถ้วน) -->
+                        <div class="space-y-2 pt-2 border-t border-purple-50">
+                            <div>
+                                <span class="text-[11px] text-slate-400 block font-medium">รายละเอียดปัญหา (แก้ไขพิมพ์ทับได้ · บันทึกอัตโนมัติ)</span>
+                                <p class="text-xs text-slate-700 font-medium mt-0.5">${t.รายละเอียดที่พบ}</p>
                             </div>
 
-                            <!-- Action Right -->
-                            <div class="space-y-2 text-xs md:text-sm bg-slate-50/70 p-3 rounded-xl border border-slate-100">
+                            <!-- หัวข้อใหม่: การแก้ไข ณ จุดตรวจ -->
+                            ${t.การแก้ไขณจุดตรวจ ? `
+                                <div class="bg-emerald-50/80 border border-emerald-100 rounded-2xl p-2.5 mt-2">
+                                    <span class="text-[11px] font-bold text-emerald-700 block flex items-center gap-1">
+                                        <i class="fa-solid fa-check"></i> การแก้ไข ณ จุดตรวจ (แก้ไขทันทีที่หน้างาน):
+                                    </span>
+                                    <p class="text-xs text-emerald-900 mt-0.5">${t.การแก้ไขณจุดตรวจ}</p>
+                                </div>
+                            ` : ''}
+
+                            <!-- หัวข้อใหม่: มาตรการแก้ไขและติดตาม & ผู้รับผิดชอบ/กำหนดเสร็จ -->
+                            <div class="bg-purple-50/30 rounded-2xl p-3 border border-purple-50 space-y-2 mt-2">
                                 <div>
-                                    <span class="text-slate-500 font-medium">มาตรการแก้ไขและติดตาม:</span>
-                                    <textarea onblur="updateField('${t.id}', 'มาตรการแก้ไขและติดตาม', this.value)" class="w-full mt-1 bg-white border border-slate-200 rounded-lg p-2 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500" rows="2" placeholder="ระบุมาตรการแก้ไข...">${t.มาตรการแก้ไขและติดตาม || ''}</textarea>
+                                    <span class="text-[11px] font-semibold text-purple-900 block">มาตรการแก้ไขและติดตาม:</span>
+                                    <textarea onblur="updateField('${t.id}', 'มาตรการแก้ไขและติดตาม', this.value)" class="w-full mt-1 bg-white border border-slate-200 rounded-xl p-2 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-purple-400" rows="2" placeholder="ระบุมาตรการแก้ไขและติดตาม...">${t.มาตรการแก้ไขและติดตาม || ''}</textarea>
                                 </div>
-                                <div class="grid grid-cols-2 gap-2 pt-1">
+                                <div class="grid grid-cols-2 gap-2 text-xs">
                                     <div>
-                                        <span class="text-slate-400 text-xs">ผู้รับผิดชอบ:</span>
-                                        <input type="text" value="${t.ผู้รับผิดชอบ || 'TBD'}" onblur="updateField('${t.id}', 'ผู้รับผิดชอบ', this.value)" class="w-full bg-white border border-slate-200 rounded-md px-2 py-1 text-xs text-slate-700 font-medium focus:outline-none">
+                                        <span class="text-[11px] text-slate-400 block">ผู้รับผิดชอบ:</span>
+                                        <input type="text" value="${t.ผู้รับผิดชอบ || 'TBD'}" onblur="updateField('${t.id}', 'ผู้รับผิดชอบ', this.value)" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs text-slate-700 font-medium">
                                     </div>
                                     <div>
-                                        <span class="text-slate-400 text-xs">กำหนดเสร็จ:</span>
-                                        <input type="text" value="${t.กำหนดเสร็จ || 'TBD'}" onblur="updateField('${t.id}', 'กำหนดเสร็จ', this.value)" class="w-full bg-white border border-slate-200 rounded-md px-2 py-1 text-xs text-slate-700 font-medium focus:outline-none">
+                                        <span class="text-[11px] text-slate-400 block">กำหนดเสร็จ:</span>
+                                        <input type="text" value="${t.กำหนดเสร็จ || 'TBD'}" onblur="updateField('${t.id}', 'กำหนดเสร็จ', this.value)" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs text-slate-700 font-medium">
                                     </div>
-                                </div>
-                                <div class="flex justify-between items-center text-xs text-slate-400 pt-2 border-t border-slate-200/60">
-                                    <span>ผู้ตรวจ: <strong class="text-slate-600">${t.ผู้ตรวจ}</strong></span>
-                                    <span>วันที่: <strong class="text-slate-600">${t.วันที่ตรวจ}</strong></span>
                                 </div>
                             </div>
                         </div>
