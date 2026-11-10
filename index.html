@@ -175,6 +175,26 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 .closed-row{padding:.7rem 1rem;border-left:4px solid var(--done);background:color-mix(in srgb,var(--done) 5%,var(--card))}
 .closed-row button{min-height:2.4rem;background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer}.trunc{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media (max-width:640px){.inp,.btn,.btn2{min-height:2.75rem}.inp{font-size:16px}.card{border-radius:16px}}
+/* ---- การ์ดปัญหา: ช่องข้อมูลโทนเดียวกับธีมหลัก ---- */
+.tk{padding:0;overflow:hidden}
+.tk-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.5rem;padding:.8rem 1.25rem;background:var(--hdr);color:var(--hdrfg);border-bottom:1px solid var(--line)}
+.tk-body{padding:1.1rem 1.25rem 1.3rem;display:flex;flex-direction:column;gap:1rem}
+.chips{display:flex;flex-wrap:wrap;gap:.4rem}
+.chip{display:inline-flex;align-items:center;gap:.3rem;padding:.22rem .7rem;border-radius:999px;font-size:.78rem;font-weight:600;border:1px solid transparent;background:color-mix(in srgb,var(--tc) 11%,var(--card));color:color-mix(in srgb,var(--tc) 78%,var(--ink));border-color:color-mix(in srgb,var(--tc) 22%,transparent)}
+.c-blue{--tc:#4f63d2}.c-lav{--tc:#8b6fd6}.c-pink{--tc:#d6609a}.c-gray{--tc:#64748b}
+.sec{--tc:#4f63d2;display:flex;flex-direction:column;gap:.75rem;border-radius:20px;padding:1rem 1.1rem;border:1px solid color-mix(in srgb,var(--tc) 22%,var(--line));background:color-mix(in srgb,var(--tc) 6%,var(--card))}
+.sec-blue{--tc:#4f63d2}.sec-lav{--tc:#8b6fd6}.sec-mint{--tc:#2f855a}.sec-pink{--tc:#d6609a}
+.zone.sec{background:color-mix(in srgb,var(--tc) 6%,var(--card))!important;padding:1rem 1.1rem!important}
+.sec.dz-over{background:color-mix(in srgb,var(--tc) 18%,var(--card))!important}
+.sec-t{display:flex;align-items:center;gap:.55rem;font-size:.84rem;font-weight:700;color:color-mix(in srgb,var(--tc) 80%,var(--ink))}
+.sec-t i{font-style:normal;display:inline-grid;place-items:center;width:1.8rem;height:1.8rem;border-radius:10px;background:color-mix(in srgb,var(--tc) 16%,var(--card));font-size:.95rem}
+.sec-t small{font-weight:400;color:var(--muted);font-size:.74rem}
+.sec .inp{background:var(--card);border-color:color-mix(in srgb,var(--tc) 18%,var(--line))}
+.sec .inp:focus{border-color:var(--tc);box-shadow:0 0 0 3px color-mix(in srgb,var(--tc) 18%,transparent)}
+.sec .btn2{background:var(--card)}
+.dz-hint{border:1.5px dashed color-mix(in srgb,var(--tc) 40%,var(--line));border-radius:14px;padding:.8rem;text-align:center;font-size:.78rem;color:var(--muted);background:color-mix(in srgb,var(--card) 70%,transparent)}
+.fld{display:flex;flex-direction:column;gap:.35rem;font-size:.76rem;font-weight:600;color:var(--muted)}.fld .inp{font-weight:400;color:var(--ink)}
+.sec .sec{background:color-mix(in srgb,var(--tc) 6%,var(--card))}
 </style>
 </head>
 <body>
@@ -537,13 +557,14 @@ function vDay() {
     <div class="space-y-4">${html || `<p class="card p-4" style="color:var(--muted)">${recs.length ? "ไม่พบรายการตามตัวกรอง" : !synced ? "⏳ กำลังโหลดข้อมูลจาก Firebase…" : "🐶🐱 ยังไม่มีข้อมูล — อัปโหลดไฟล์ตรวจเวรด้านบน ทุกเครื่องจะเห็นข้อมูลตรงกันทันที"}</p>`}</div>`;
 }
 const RB = "background:rgba(0,0,0,.65);color:#fff;border-radius:999px;width:1.6rem;height:1.6rem";
-const zone = (dz, arr, title, color, cam) => `<div data-drop="${dz}" tabindex="0" class="zone rounded-2xl p-4 space-y-3" style="border:1.5px dashed color-mix(in srgb,${color} 50%,var(--line));background:color-mix(in srgb,${color} 4%,transparent)" aria-label="${title}">
-  <div class="flex flex-wrap items-center justify-between gap-2"><p class="text-xs font-semibold" style="color:${color}">${title} <span style="color:var(--muted)">(${arr.length})</span></p>
-    <div class="flex flex-wrap gap-1"><label class="btn2 text-xs cursor-pointer" style="min-height:2rem;padding:.2rem .6rem">+ รูป<input type="file" accept="image/*" multiple class="sr-only" data-addfile="${dz}"></label>
-      ${cam ? `<label class="btn2 text-xs cursor-pointer" style="min-height:2rem;padding:.2rem .6rem">📷<input type="file" accept="image/*" capture="environment" class="sr-only" data-addfile="${dz}" aria-label="ถ่ายรูป"></label>` : ""}</div></div>
+const zone = (dz, arr, title, color, cam) => { const tone = /done/.test(color) ? "mint" : "lav", ico = tone === "mint" ? "✅" : "📷";
+  return `<div data-drop="${dz}" tabindex="0" class="zone sec sec-${tone}" aria-label="${title}">
+  <div class="flex flex-wrap items-center justify-between gap-2"><div class="sec-t"><i>${ico}</i>${title} <small>${arr.length} รูป</small></div>
+    <div class="flex flex-wrap gap-1"><label class="btn2 text-xs cursor-pointer" style="min-height:2rem;padding:.2rem .7rem">+ รูป<input type="file" accept="image/*" multiple class="sr-only" data-addfile="${dz}"></label>
+      ${cam ? `<label class="btn2 text-xs cursor-pointer" style="min-height:2rem;padding:.2rem .7rem">📷<input type="file" accept="image/*" capture="environment" class="sr-only" data-addfile="${dz}" aria-label="ถ่ายรูป"></label>` : ""}</div></div>
   ${arr.length ? `<div class="grid grid-cols-4 sm:grid-cols-5 gap-2">${arr.map((u, i) => `<div class="relative"><button class="photo w-full" data-act="ph" data-dz="${dz}" data-i="${i}" aria-label="ดูรูปที่ ${i + 1}"><img src="${esc(u)}" alt="${title} ${i + 1}" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'โหลดรูปไม่ได้',className:'text-xs p-1 block'}))"></button><button class="absolute top-1 right-1 text-xs" style="${RB}" data-act="delph" data-dz="${dz}" data-i="${i}" aria-label="ลบรูป">✕</button></div>`).join("")}</div>`
-   : `<p class="text-xs" style="color:var(--muted)">ลากรูปมาวาง หรือคลิกกรอบแล้วกด Ctrl+V</p>`}
-  <details class="text-xs"><summary class="cursor-pointer" style="color:var(--muted)">เพิ่มจากลิงก์รูป</summary><div class="flex gap-1 mt-2"><input class="inp" data-url="1" placeholder="https://…"><button class="btn2" data-act="addurl" data-dz="${dz}">เพิ่ม</button></div></details></div>`;
+   : `<div class="dz-hint">ลากรูปมาวาง หรือคลิกกรอบนี้แล้วกด Ctrl+V</div>`}
+  <details class="text-xs"><summary class="cursor-pointer" style="color:var(--muted)">เพิ่มจากลิงก์รูป</summary><div class="flex gap-1 mt-2"><input class="inp" data-url="1" placeholder="https://…"><button class="btn2" data-act="addurl" data-dz="${dz}">เพิ่ม</button></div></details></div>`; };
 function closedRow(x) {   // การ์ดที่ปิดประเด็นแล้ว: ย่อเป็นแถวสรุป คลิกเพื่อขยาย
   const subs = x.subs, sum = subs.length ? `ข้อย่อย ${subs.filter(s => s.status === CLOSED).length}/${subs.length} · ${subs.map(s => s.text).join(" / ")}` : (x.detail || "-"), ca = closedAtOf(x);
   return `<article class="card closed-row ${flashId === x.id ? "flash" : ""}" data-id="${x.id}"><button class="w-full text-left flex flex-wrap items-center gap-x-3 gap-y-1" data-act="cardtoggle" data-id="${x.id}" aria-expanded="false" aria-label="ขยายรายละเอียด ${esc(x.ticket)}">
@@ -565,27 +586,32 @@ function card(x) {
           : `<button class="btn2 btn-edit text-xs" data-act="editsub" data-id="${x.id}" data-sid="${s.id}">✎ แก้ไข</button><button class="btn2 btn-del text-xs" data-act="delsub" data-id="${x.id}" data-sid="${s.id}" ${cl ? "disabled" : ""}>ลบข้อ</button>`}</span></div>
       ${ed ? `<p class="text-xs" style="color:var(--prog)">กำลังแก้ไข — ข้อความจะยังไม่ถูกบันทึกจนกว่าจะกด “บันทึก”</p>` : ""}
       ${zone(`${x.id}|${s.id}|after`, s.after || [], "รูปหลังแก้ไข (After)", "var(--done)", true)}</div>`; };
-  return `<article class="card p-5 space-y-4 ${flashId === x.id ? "flash" : ""}" data-id="${x.id}" style="border-left:5px solid ${SC[st]};${done ? "opacity:.88" : ""}">
-    <div class="flex flex-wrap items-center justify-between gap-2"><b class="font-mono text-sm">${x.order ? "#" + x.order + " · " : ""}${done ? "✓ " : ""}${esc(x.ticket)}</b>${done ? `<button class="btn2 text-xs" data-act="cardtoggle" data-id="${x.id}" aria-expanded="true">▴ ย่อการ์ด</button>` : ""}<span class="flex gap-1">${late(x) ? `<span class="pill" style="background:var(--bad)">เกินกำหนด</span>` : ""}${statusPill(st)}</span></div>
-    <h3 class="font-semibold">${esc(ptKey(x))}</h3>
-    <p class="text-xs" style="color:var(--muted)">ผู้ตรวจ ${esc(x.inspector || "-")}${x.type ? " · " + esc(x.type) : ""}${x.stamp ? " · บันทึก " + esc(x.stamp) : ""}${x.pdf ? " · หน้า PDF " + esc(x.pdf) : ""}</p>
-    ${subs.length ? "" : `<label class="block text-xs font-semibold">รายละเอียดปัญหา <span class="font-normal" style="color:var(--muted)">(แก้ไขพิมพ์ทับได้ · บันทึกอัตโนมัติ)</span><textarea class="inp font-normal" rows="3" data-f="detail">${esc(x.detail)}</textarea></label>`}
-    ${zone(`${x.id}||photos`, x.photos, "รูปภาพหลักฐาน (Before)", "var(--wait)", false)}
-    ${x.orig ? `<p class="text-xs" style="color:var(--muted)">รูปประกอบจากต้นฉบับ: ${/^https?:\/\/\S+$/.test(x.orig) ? `<a class="underline" style="color:var(--brand)" href="${esc(x.orig)}" target="_blank" rel="noopener">${esc(x.orig)}</a>` : esc(x.orig)}</p>` : ""}
-    ${subs.length ? "" : zone(`${x.id}||after`, x.after || [], "รูปหลังแก้ไข (After)", "var(--done)", true)}
-    <label class="block text-xs font-semibold">การแก้ไข ณ จุดตรวจ <span class="font-normal" style="color:var(--muted)">(แก้ไขทันที · บันทึกอัตโนมัติ)</span><textarea class="inp font-normal" rows="2" data-f="onsite" placeholder="สิ่งที่แก้ไขทันที ณ จุดตรวจ">${esc(x.onsite)}</textarea></label>
-    <div class="grid grid-cols-2 gap-2">
-      <label class="text-xs">หมวดหมู่<select class="inp" data-f="category">${opt(cats.map(c => c.name), x.category)}</select></label>
-      <label class="text-xs">ผู้รับผิดชอบ<select class="inp" data-f="worker">${opt(workers, x.worker, "ไม่ระบุ")}</select></label>
-      <label class="text-xs">กำหนดเสร็จ<input type="date" class="inp" data-f="due" value="${esc(x.due)}" style="${late(x) ? "border-color:var(--bad)" : ""}"></label></div>
-    ${subs.length ? `<div class="space-y-2"><p class="text-xs font-semibold">ข้อย่อย (${subs.filter(s => s.status === CLOSED).length}/${subs.length} ปิดแล้ว) — ล็อกไว้ ต้องกด “แก้ไข” แล้ว “บันทึก”</p>${subs.map(sub).join("")}</div>`
-    : `<div class="seg flex" role="group" aria-label="สถานะ">${STATUS.map(s => `<button data-act="st" data-id="${x.id}" data-s="${s}" aria-pressed="${s === x.status}" style="${s === x.status ? "background:" + SC[s] + ";border-color:" + SC[s] : ""}">${s}</button>`).join("")}</div>`}
-    ${ca ? `<p class="text-xs font-semibold" style="color:var(--done)">ปิดประเด็นเมื่อ ${fmtT(ca)}</p>` : ""}
-    <div class="flex flex-wrap gap-2 text-sm">
-      ${subs.length ? `<button class="btn2" data-act="unsplit" data-id="${x.id}">ยกเลิกการแยกข้อย่อย</button>` : `<button class="btn2" data-act="split" data-id="${x.id}" ${can ? "" : 'title="ไม่พบการเรียงเป็นข้อๆ ในรายละเอียด"'}>แยกเป็นข้อย่อย</button>`}
-      <button class="btn2" data-act="addsub" data-id="${x.id}">+ เพิ่มข้อย่อย</button></div>
-    <label class="block text-xs font-semibold">${subs.length ? "มาตรการแก้ไขและติดตาม (รวม)" : "มาตรการแก้ไขและติดตาม"}<textarea class="inp font-normal" rows="${st === PROG && !subs.length ? 3 : 2}" data-f="note" placeholder="ระบุสิ่งที่ทำ / ผู้ติดตาม / กำหนดเสร็จ" style="${st === PROG ? "border-color:var(--prog)" : ""}">${esc(x.note)}</textarea></label>
-    <button class="btn2 btn-del text-xs" data-act="del" data-id="${x.id}">ลบรายการนี้</button></article>`;
+  const chip = (cls, ico, t) => t ? `<span class="chip ${cls}">${ico} ${esc(t)}</span>` : "", zc = x.zone && x.zone !== "-" ? x.zone : "", ac = x.area && x.area !== "-" ? x.area : "";
+  return `<article class="card tk ${flashId === x.id ? "flash" : ""}" data-id="${x.id}" style="border-left:5px solid ${SC[st]};${done ? "opacity:.92" : ""}">
+    <div class="tk-head"><b class="font-mono text-sm">${x.order ? "#" + x.order + " · " : ""}${done ? "✓ " : ""}${esc(x.ticket)}</b>
+      <span class="flex flex-wrap items-center gap-2">${done ? `<button class="btn2 text-xs" data-act="cardtoggle" data-id="${x.id}" aria-expanded="true">▴ ย่อการ์ด</button>` : ""}${late(x) ? `<span class="pill" style="background:var(--bad)">เกินกำหนด</span>` : ""}${statusPill(st)}</span></div>
+    <div class="tk-body">
+      <div><h3 class="font-semibold text-base mb-2">${esc(ac || zc || "ไม่ระบุพื้นที่")}</h3>
+        <div class="chips">${ac && zc ? chip("c-blue", "📍", zc) : ""}${chip("c-pink", "⚠️", x.type && x.type !== "-" ? x.type : "")}${chip("c-lav", "👤", "ผู้ตรวจ " + (x.inspector || "-"))}${x.pdf ? chip("c-gray", "📄", "หน้า PDF " + x.pdf) : ""}${x.stamp ? chip("c-gray", "🕒", x.stamp) : ""}</div></div>
+      ${subs.length ? "" : `<section class="sec sec-blue"><div class="sec-t"><i>📝</i>รายละเอียดที่พบ <small>แก้ไขพิมพ์ทับได้ · บันทึกอัตโนมัติ</small></div><textarea class="inp" rows="3" data-f="detail" aria-label="รายละเอียดที่พบ">${esc(x.detail)}</textarea></section>`}
+      ${zone(`${x.id}||photos`, x.photos, "รูปภาพหลักฐาน (Before)", "var(--wait)", false)}
+      ${x.orig ? `<p class="text-xs" style="color:var(--muted)">รูปประกอบจากต้นฉบับ: ${/^https?:\/\/\S+$/.test(x.orig) ? `<a class="underline" style="color:var(--brand)" href="${esc(x.orig)}" target="_blank" rel="noopener">${esc(x.orig)}</a>` : esc(x.orig)}</p>` : ""}
+      ${subs.length ? "" : zone(`${x.id}||after`, x.after || [], "รูปหลังแก้ไข (After)", "var(--done)", true)}
+      <section class="sec sec-pink"><div class="sec-t"><i>🔧</i>การแก้ไข ณ จุดตรวจ <small>แก้ไขทันที · บันทึกอัตโนมัติ</small></div><textarea class="inp" rows="2" data-f="onsite" placeholder="สิ่งที่แก้ไขทันที ณ จุดตรวจ" aria-label="การแก้ไข ณ จุดตรวจ">${esc(x.onsite)}</textarea></section>
+      <section class="sec sec-blue"><div class="sec-t"><i>🗂</i>การติดตามผล</div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <label class="fld">หมวดหมู่<select class="inp" data-f="category">${opt(cats.map(c => c.name), x.category)}</select></label>
+          <label class="fld">ผู้รับผิดชอบ<select class="inp" data-f="worker">${opt(workers, x.worker, "ไม่ระบุ")}</select></label>
+          <label class="fld">กำหนดเสร็จ<input type="date" class="inp" data-f="due" value="${esc(x.due)}" style="${late(x) ? "border-color:var(--bad)" : ""}"></label></div>
+        ${subs.length ? `<div class="space-y-3"><p class="text-xs font-semibold" style="color:var(--muted)">ข้อย่อย (${subs.filter(s => s.status === CLOSED).length}/${subs.length} ปิดแล้ว) — ล็อกไว้ ต้องกด “แก้ไข” แล้ว “บันทึก”</p>${subs.map(sub).join("")}</div>`
+        : `<div class="seg flex" role="group" aria-label="สถานะติดตาม">${STATUS.map(s => `<button data-act="st" data-id="${x.id}" data-s="${s}" aria-pressed="${s === x.status}" style="${s === x.status ? "background:" + SC[s] + ";border-color:" + SC[s] : ""}">${s}</button>`).join("")}</div>`}
+        ${ca ? `<p class="text-xs font-semibold" style="color:var(--done)">ปิดประเด็นเมื่อ ${fmtT(ca)}</p>` : ""}
+        <div class="flex flex-wrap gap-2 text-sm">
+          ${subs.length ? `<button class="btn2" data-act="unsplit" data-id="${x.id}">ยกเลิกการแยกข้อย่อย</button>` : `<button class="btn2" data-act="split" data-id="${x.id}" ${can ? "" : 'title="ไม่พบการเรียงเป็นข้อๆ ในรายละเอียด"'}>แยกเป็นข้อย่อย</button>`}
+          <button class="btn2" data-act="addsub" data-id="${x.id}">+ เพิ่มข้อย่อย</button></div>
+        <label class="fld">${subs.length ? "มาตรการแก้ไขและติดตาม (รวม)" : "มาตรการแก้ไขและติดตาม"}<textarea class="inp" rows="${st === PROG && !subs.length ? 3 : 2}" data-f="note" placeholder="ระบุสิ่งที่ทำ / ผู้ติดตาม / กำหนดเสร็จ" style="${st === PROG ? "border-color:var(--prog)" : ""}">${esc(x.note)}</textarea></label></section>
+      <div><button class="btn2 btn-del text-xs" data-act="del" data-id="${x.id}">ลบรายการนี้</button></div>
+    </div></article>`;
 }
 
 /* ----- แท็บสถิติ ----- */
