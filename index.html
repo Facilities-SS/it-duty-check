@@ -152,18 +152,41 @@ select.inp{appearance:none;padding-right:2.3rem;background-image:url("data:image
 .btn-ok{background:linear-gradient(135deg,#34d399,#059669)!important;color:#fff}
 .btn-edit{border-color:#f59e0b;color:#b45309}.btn-edit:hover:not(:disabled){background:color-mix(in srgb,#f59e0b 16%,var(--card))!important}
 .btn-del{border-color:#fecdd3;color:var(--bad)}.btn-del:hover:not(:disabled){background:color-mix(in srgb,#e11d48 12%,var(--card))!important}
+/* ---- โทนสีใหม่: สุภาพ สบายตา ---- */
+:root{--ink:#1e293b;--paper:#f5f7fb;--card:#fff;--line:#e3e8f0;--muted:#64748b;--brand:#4f63d2;--wait:#b7791f;--prog:#2b7bb9;--done:#2f855a;--bad:#c2415b;--hdr:linear-gradient(120deg,#dbe4ff,#e9e3ff 60%,#f6e6f0);--hdrfg:#27304f;--field:#f8fafc;--sky:linear-gradient(#e8eeff 0%,#f4f0fc 80%);--fl1:#efe6d6;--fl2:#e8dcc6;--fl3:#d9cbb0}
+@media (prefers-color-scheme:dark){:root{--ink:#e2e8f0;--paper:#0f172a;--card:#1b2435;--line:#2e3a50;--muted:#94a3b8;--brand:#8da2fb;--field:#141c2c}}
+body{background:var(--paper);font-size:15px}
+.card{border-color:var(--line);box-shadow:0 1px 3px rgba(30,41,59,.06)}.card:hover{box-shadow:0 4px 14px rgba(30,41,59,.08)}
+article.card{box-shadow:0 2px 8px rgba(30,41,59,.06)}
+.inp{background:var(--field);border:1px solid var(--line);color:var(--ink);box-shadow:none}
+.inp:focus{border-color:var(--brand);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 18%,transparent);background:var(--card)}
+.inp[readonly]{background:color-mix(in srgb,var(--line) 45%,var(--card))}
+input[type=search].inp{padding-left:2.5rem;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-3.5-3.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:.85rem center}
+select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")}
+.btn{background:var(--brand);color:#fff;box-shadow:0 1px 2px rgba(30,41,59,.15)}.btn:hover{filter:brightness(1.06);box-shadow:0 3px 10px color-mix(in srgb,var(--brand) 30%,transparent)}
+@media (prefers-color-scheme:dark){.btn{color:#0f172a}}
+.btn2{background:var(--card);border:1px solid var(--line);color:var(--ink)}.btn2:hover:not(:disabled){background:color-mix(in srgb,var(--brand) 8%,var(--card));border-color:color-mix(in srgb,var(--brand) 45%,var(--line))}
+.btn-ok{background:var(--done)!important;color:#fff}
+.btn-edit{border-color:color-mix(in srgb,var(--wait) 55%,var(--line));color:var(--wait)}.btn-edit:hover:not(:disabled){background:color-mix(in srgb,var(--wait) 12%,var(--card))!important}
+.btn-del{border-color:color-mix(in srgb,var(--bad) 35%,var(--line));color:var(--bad)}.btn-del:hover:not(:disabled){background:color-mix(in srgb,var(--bad) 10%,var(--card))!important}
+.tab{color:var(--muted)}.tab[aria-selected=true]{color:var(--brand);background:color-mix(in srgb,var(--brand) 10%,transparent)}
+.pill{box-shadow:none}
+.zone{background:color-mix(in srgb,var(--field) 70%,transparent)!important}
+.closed-row{padding:.7rem 1rem;border-left:4px solid var(--done);background:color-mix(in srgb,var(--done) 5%,var(--card))}
+.closed-row button{min-height:2.4rem;background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer}.trunc{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:640px){.inp,.btn,.btn2{min-height:2.75rem}.inp{font-size:16px}.card{border-radius:16px}}
 </style>
 </head>
 <body>
 <header class="px-4 py-3" style="background:var(--hdr);color:var(--hdrfg)">
   <div class="max-w-6xl mx-auto"><h1 class="text-lg font-bold">🐾 ติดตามผลตรวจเวรวันหยุด</h1>
-  <p class="text-xs opacity-90">บริษัท ไอ-เทล คอร์ปอเรชั่น จำกัด (มหาชน) · ข้อมูลเก็บในเบราว์เซอร์เครื่องนี้ · ทีมสัตว์เลี้ยงทำความสะอาด 🐱🐶 <span id="syncBadge" class="ml-1 px-2 rounded-full" style="background:rgba(255,255,255,.6)">⏳ กำลังเชื่อมต่อ…</span></p></div>
+  <p class="text-xs opacity-90">บริษัท ไอ-เทล คอร์ปอเรชั่น จำกัด (มหาชน) · ซิงค์ผ่าน Firebase Cloud <span id="syncBadge" class="ml-1 px-2 rounded-full" style="background:rgba(255,255,255,.6)">⏳ กำลังเชื่อมต่อ…</span></p></div>
 </header>
 <nav class="border-b" style="border-color:var(--line)"><div class="max-w-6xl mx-auto flex overflow-x-auto" role="tablist">
   <button class="tab" data-v="day" role="tab">รายวัน</button><button class="tab" data-v="stat" role="tab">สถิติ</button><button class="tab" data-v="manage" role="tab">หมวดหมู่ / ผู้รับผิดชอบ</button>
 </div></nav>
 <main class="max-w-6xl mx-auto p-3 sm:p-4 space-y-3">
-  <section id="stage" class="stage" aria-label="ทีมสัตว์เลี้ยงทำความสะอาด"></section>
+  <section id="stage" class="stage" aria-label="ฉากตกแต่ง"></section>
   <label id="drop" class="card p-3 border-2 border-dashed block text-center cursor-pointer">
     <input type="file" id="xl" accept=".xlsx,.xls" class="sr-only">
     <b>แตะเพื่อเลือกไฟล์ตรวจเวร (Excel)</b> หรือลากมาวาง
@@ -468,7 +491,7 @@ $("#tpl").onclick = () => {
 let view = "day", per = "day", q = "", fst = "", fz = "", fa = "", fc = "", showOk = true, ptq = "";
 const editSubs = new Set();
 const byOpen = (a, b) => (effStatus(a) === CLOSED) - (effStatus(b) === CLOSED) || (a.ticket || "").localeCompare(b.ticket || "");
-const openDays = new Set(), openPts = new Set(), drafts = new Map();
+const openDays = new Set(), openPts = new Set(), drafts = new Map(), openCards = new Set();
 let editDate = null, flashId = null, animNext = false;
 recs.forEach(r => (r.subs || []).forEach(x => { if (x.isNew) { editSubs.add(x.id); drafts.set(x.id, {text:x.text, note:x.note || ""}); } }));
 addEventListener("beforeunload", e => { if ([...drafts].some(([id, d]) => { const x = recs.flatMap(r => r.subs).find(y => y.id === id); return !x || d.text !== x.text || d.note !== (x.note || ""); })) { e.preventDefault(); e.returnValue = ""; } });
@@ -495,7 +518,8 @@ function vDay() {
       const ok = !fst && !fc && showOk ? all.filter(r => r.result === "ok" && zm(r) && (!nq || norm(ptKey(r) + r.inspector).includes(nq))) : [];
       if (!ab.length && !ok.length) return "";
       body = `<div class="p-4 space-y-4" style="border-top:1px solid var(--line)">
-        <div class="grid lg:grid-cols-2 gap-4">${ab.map(card).join("")}</div>
+        <div class="grid lg:grid-cols-2 gap-4">${ab.filter(r => effStatus(r) !== CLOSED).map(card).join("")}</div>
+        ${ab.some(r => effStatus(r) === CLOSED) ? `<div class="space-y-2"><p class="text-xs font-semibold" style="color:var(--muted)">ปิดประเด็นแล้ว (${ab.filter(r => effStatus(r) === CLOSED).length}) — คลิกแถวเพื่อดูรายละเอียด</p>${ab.filter(r => effStatus(r) === CLOSED).map(card).join("")}</div>` : ""}
         ${ok.length ? `<div><h3 class="text-sm font-semibold mb-1" style="color:var(--done)">ไม่พบสิ่งผิดปกติ (${ok.length} จุด)</h3>${ok.map(r => `<div class="flex justify-between gap-2 text-sm py-1" style="border-bottom:1px solid var(--line)"><span>✓ ${esc(ptKey(r))} <span class="text-xs" style="color:var(--muted)">— ${esc(r.detail && r.detail !== "-" ? r.detail : "ตรวจปกติ / ไม่พบสิ่งผิดปกติ")}</span></span><span style="color:var(--muted)">${esc(r.inspector)}</span></div>`).join("")}</div>` : ""}</div>`;
     }
     const hdr = editDate === d ? `<div class="p-4 flex flex-wrap items-center gap-2"><input type="date" id="dateIn" class="inp" style="width:auto" value="${d}" aria-label="วันที่ใหม่"><button class="btn" data-act="datesave" data-d="${d}">บันทึกวันที่</button><button class="btn2" data-act="datecancel">ยกเลิก</button></div>`
@@ -520,9 +544,15 @@ const zone = (dz, arr, title, color, cam) => `<div data-drop="${dz}" tabindex="0
   ${arr.length ? `<div class="grid grid-cols-4 sm:grid-cols-5 gap-2">${arr.map((u, i) => `<div class="relative"><button class="photo w-full" data-act="ph" data-dz="${dz}" data-i="${i}" aria-label="ดูรูปที่ ${i + 1}"><img src="${esc(u)}" alt="${title} ${i + 1}" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'โหลดรูปไม่ได้',className:'text-xs p-1 block'}))"></button><button class="absolute top-1 right-1 text-xs" style="${RB}" data-act="delph" data-dz="${dz}" data-i="${i}" aria-label="ลบรูป">✕</button></div>`).join("")}</div>`
    : `<p class="text-xs" style="color:var(--muted)">ลากรูปมาวาง หรือคลิกกรอบแล้วกด Ctrl+V</p>`}
   <details class="text-xs"><summary class="cursor-pointer" style="color:var(--muted)">เพิ่มจากลิงก์รูป</summary><div class="flex gap-1 mt-2"><input class="inp" data-url="1" placeholder="https://…"><button class="btn2" data-act="addurl" data-dz="${dz}">เพิ่ม</button></div></details></div>`;
+function closedRow(x) {   // การ์ดที่ปิดประเด็นแล้ว: ย่อเป็นแถวสรุป คลิกเพื่อขยาย
+  const subs = x.subs, sum = subs.length ? `ข้อย่อย ${subs.filter(s => s.status === CLOSED).length}/${subs.length} · ${subs.map(s => s.text).join(" / ")}` : (x.detail || "-"), ca = closedAtOf(x);
+  return `<article class="card closed-row ${flashId === x.id ? "flash" : ""}" data-id="${x.id}"><button class="w-full text-left flex flex-wrap items-center gap-x-3 gap-y-1" data-act="cardtoggle" data-id="${x.id}" aria-expanded="false" aria-label="ขยายรายละเอียด ${esc(x.ticket)}">
+    <span class="pill" style="background:var(--done)">✓ ปิดประเด็นแล้ว</span><b class="font-mono text-sm">${esc(x.ticket)}</b><span class="text-sm font-semibold">${esc(ptKey(x))}</span>
+    <span class="text-sm trunc" style="color:var(--muted);flex:1;min-width:8rem">${esc(sum)}</span>${ca ? `<span class="text-xs" style="color:var(--done)">${fmtT(ca)}</span>` : ""}<span aria-hidden="true" style="color:var(--muted)">▸</span></button></article>`; }
 const late = x => !!x.due && effStatus(x) !== CLOSED && x.due < new Date().toLocaleDateString("sv");
 function card(x) {
   const st = effStatus(x), ca = closedAtOf(x), subs = x.subs, can = parseSubs(x.detail).length >= 2, done = st === CLOSED;
+  if (done && !openCards.has(x.id)) return closedRow(x);
   const sub = (s, i) => { const cl = s.status === CLOSED, ed = editSubs.has(s.id), dr = drafts.get(s.id) || {text:s.text, note:s.note || ""}, ro = ed ? "" : "readonly";
     return `<div class="p-4 rounded-2xl space-y-3" style="border:1px solid var(--line);border-left:4px solid ${SC[s.status]};${ed ? "background:color-mix(in srgb,var(--prog) 8%,var(--card))" : cl ? "background:color-mix(in srgb,var(--done) 10%,var(--card))" : ""}">
       <div class="flex gap-2 items-start"><span class="text-sm pt-2 w-5 shrink-0" style="${cl ? "color:var(--done);font-weight:700" : ""}">${cl ? "✓" : (i + 1) + "."}</span>
@@ -536,7 +566,7 @@ function card(x) {
       ${ed ? `<p class="text-xs" style="color:var(--prog)">กำลังแก้ไข — ข้อความจะยังไม่ถูกบันทึกจนกว่าจะกด “บันทึก”</p>` : ""}
       ${zone(`${x.id}|${s.id}|after`, s.after || [], "รูปหลังแก้ไข (After)", "var(--done)", true)}</div>`; };
   return `<article class="card p-5 space-y-4 ${flashId === x.id ? "flash" : ""}" data-id="${x.id}" style="border-left:5px solid ${SC[st]};${done ? "opacity:.88" : ""}">
-    <div class="flex flex-wrap items-center justify-between gap-2"><b class="font-mono text-sm">${x.order ? "#" + x.order + " · " : ""}${done ? "✓ " : ""}${esc(x.ticket)}</b><span class="flex gap-1">${late(x) ? `<span class="pill" style="background:var(--bad)">เกินกำหนด</span>` : ""}${statusPill(st)}</span></div>
+    <div class="flex flex-wrap items-center justify-between gap-2"><b class="font-mono text-sm">${x.order ? "#" + x.order + " · " : ""}${done ? "✓ " : ""}${esc(x.ticket)}</b>${done ? `<button class="btn2 text-xs" data-act="cardtoggle" data-id="${x.id}" aria-expanded="true">▴ ย่อการ์ด</button>` : ""}<span class="flex gap-1">${late(x) ? `<span class="pill" style="background:var(--bad)">เกินกำหนด</span>` : ""}${statusPill(st)}</span></div>
     <h3 class="font-semibold">${esc(ptKey(x))}</h3>
     <p class="text-xs" style="color:var(--muted)">ผู้ตรวจ ${esc(x.inspector || "-")}${x.type ? " · " + esc(x.type) : ""}${x.stamp ? " · บันทึก " + esc(x.stamp) : ""}${x.pdf ? " · หน้า PDF " + esc(x.pdf) : ""}</p>
     ${subs.length ? "" : `<label class="block text-xs font-semibold">รายละเอียดปัญหา <span class="font-normal" style="color:var(--muted)">(แก้ไขพิมพ์ทับได้ · บันทึกอัตโนมัติ)</span><textarea class="inp font-normal" rows="3" data-f="detail">${esc(x.detail)}</textarea></label>`}
@@ -607,6 +637,7 @@ V.addEventListener("click", async e => {
   const b = e.target.closest("[data-act]"); if (!b) return;
   const a = b.dataset.act, r = b.dataset.id && recs.find(x => x.id === b.dataset.id);
   if (a === "day") { const d = b.dataset.d; openDays.has(d) ? openDays.delete(d) : openDays.add(d); animNext = true; }
+  else if (a === "cardtoggle") { const id = b.dataset.id; openCards.has(id) ? openCards.delete(id) : openCards.add(id); }
   else if (a === "dateedit") editDate = b.dataset.d;
   else if (a === "datecancel") editDate = null;
   else if (a === "datesave") { const d = b.dataset.d, nv = $("#dateIn").value; if (!nv) return toast("กรุณาเลือกวันที่");
@@ -614,7 +645,7 @@ V.addEventListener("click", async e => {
   else if (a === "pt") { const k = b.dataset.k; openPts.has(k) ? openPts.delete(k) : openPts.add(k); }
   else if (a === "per") per = b.dataset.p;
   else if (a === "ph") { lb = {list:arrOf(b.dataset.dz), i:+b.dataset.i}; showLb(); $("#lb").showModal(); return; }
-  else if (a === "st") { setStatus(r, b.dataset.s); if (b.dataset.s === CLOSED) flashId = r.id; }
+  else if (a === "st") { setStatus(r, b.dataset.s); if (b.dataset.s === CLOSED) { flashId = r.id; openCards.delete(r.id); } }
   else if (a === "split") { const t = parseSubs(r.detail); if (t.length < 2) return toast("ไม่พบรายละเอียดที่เรียงเป็นข้อๆ — กด “+ เพิ่มข้อย่อย” เพื่อเพิ่มเอง");
     r.subs = t.map(text => ({id:uid(), text, note:"", after:[], status:r.status, closedAt:r.status === CLOSED ? r.closedAt : null})); toast(`แยกเป็น ${t.length} ข้อย่อยแล้ว`); }
   else if (a === "unsplit") { if (!await ask("ยกเลิกการแยกข้อย่อย? ข้อความและบันทึกของแต่ละข้อจะถูกรวมกลับเป็นรายละเอียดเดียว")) return;
@@ -643,7 +674,7 @@ V.addEventListener("change", e => {
   const r = recs.find(x => x.id === t.closest("article")?.dataset.id), s = r && t.dataset.sid && r.subs.find(x => x.id === t.dataset.sid), v = t.value.trim();
   if (f === "category" || f === "worker" || f === "due") r[f] = t.value;
   else if (f === "note") r.note = t.value;
-  else if (f === "substatus") { setStatus(s, t.value); if (t.value === CLOSED) flashId = r.id; save(); return render(); }
+  else if (f === "substatus") { setStatus(s, t.value); if (t.value === CLOSED) flashId = r.id; if (effStatus(r) === CLOSED) openCards.delete(r.id); save(); return render(); }
   else if (f === "catname") { const c = cats[+t.dataset.i]; if (!v || cats.some(x => x !== c && x.name === v)) { toast("ชื่อว่างหรือซ้ำ"); return render(); } recs.forEach(x => { if (x.category === c.name) x.category = v; }); c.name = v; }
   else if (f === "catkw") cats[+t.dataset.i].kw = t.value;
   else if (f === "wkname") { const i = +t.dataset.i, o = workers[i]; if (!v || workers.some((w, j) => j !== i && w === v)) { toast("ชื่อว่างหรือซ้ำ"); return render(); } recs.forEach(x => { if (x.worker === o) x.worker = v; }); workers[i] = v; }
@@ -733,7 +764,7 @@ async function exportPdf(o) {
     await saveBin(fname("pdf"), pdf.output("arraybuffer"), "application/pdf");
   } finally { host.remove(); }
 }
-/* ===== ทีมสัตว์เลี้ยงทำความสะอาด + ธีมตามเทศกาล ===== */
+/* ===== ฉากตกแต่ง + ธีมตามเทศกาล ===== */
 /* วันพระใหญ่ [ปี ค.ศ., เดือน, วัน] — ตรวจกับปฏิทินราชการแล้วถึงปี 2027 ต้องเพิ่มปีถัดไปเอง (ธีมตั้งเองได้จากเมนูมุมแบนเนอร์) */
 const BUDDHIST = [[2026,3,3],[2026,5,31],[2026,7,29],[2027,2,21],[2027,5,20],[2027,7,18]];
 const CNY = {2026:[2,17], 2027:[2,6], 2028:[1,26], 2029:[2,13], 2030:[2,3], 2031:[1,23], 2032:[2,11], 2033:[1,31], 2034:[2,19], 2035:[2,8]};   // วันตรุษจีน (เดือน, วัน)
@@ -782,8 +813,6 @@ function festivalOf(dt) {
     cny:`<div class="fx fx-cny">${lantern(38)}${lantern(52)}${lantern(66)}${fall("🧧", 4)}<span class="sp" style="left:30%;top:24px;font-size:22px">🎆</span></div>`,
     songkran:`<div class="fx fx-songkran">${[6, 17, 29, 42, 55, 67, 79, 90].map((x, i) => `<span class="rp" style="left:${x}%;animation-delay:-${i * .4}s"><b></b><i></i><i></i><i></i><i></i></span>`).join("")}${fall("💧", 14)}</div>`,
     buddhist:`<div class="fx fx-buddhist"><div class="glow"></div>${[8, 24, 41, 58, 74, 90].map((x, i) => `<span class="rise" style="left:${x}%;animation-delay:-${i * 1.5}s;font-size:22px">🪷</span>`).join("")}</div>`};
-  const GREET = {"":"🐶🐱 ทีมสัตว์เลี้ยงทำความสะอาด", xmas:"🎄 Merry Christmas! ทีมสัตว์เลี้ยงสวมหมวกซานต้ามาช่วยกันทำความสะอาด", newyear:"🎆 สวัสดีปีใหม่! ทีมสัตว์เลี้ยงฉลองปีใหม่ไปด้วยทำความสะอาดไปด้วย",
-    cny:"🧧 ซินเจียยู่อี่ ซินนี้ฮวดไช้! ทีมสัตว์เลี้ยงมาพร้อมโคมแดง", songkran:"💦 สุขสันต์วันสงกรานต์! ทีมสัตว์เลี้ยงมาพร้อมดอกราชพฤกษ์", buddhist:"🪷 วันพระใหญ่ ขอให้ร่มเย็นเป็นสุข ทีมสัตว์เลี้ยงทำความสะอาดอย่างสงบ"};
   const OPT = [["auto", "อัตโนมัติ (ตามวันที่)"], ["none", "ปกติ"], ["xmas", "🎄 คริสต์มาส"], ["newyear", "🎆 ปีใหม่"], ["cny", "🧧 ตรุษจีน"], ["songkran", "💦 สงกรานต์"], ["buddhist", "🪷 วันพระใหญ่"]];
   const stage = $("#stage");
   stage.innerHTML = `<div class="scene" aria-hidden="true">
@@ -791,7 +820,6 @@ function festivalOf(dt) {
       <svg class="web" viewBox="0 0 90 90"><g stroke="#b9a8d0" stroke-width="1.2" fill="none"><path d="M90 0 L0 0 M90 0 L0 52 M90 0 L30 90 M90 0 L90 90"/><path d="M70 0 Q64 16 90 22 M48 0 Q40 30 90 44 M26 0 Q22 44 90 66"/></g></svg>
       <span class="sp" style="left:30%;top:50px">✨</span><span class="sp" style="left:56%;top:34px;animation-delay:-1.2s">✨</span><span class="sp" style="left:88%;top:96px;animation-delay:-2s">💫</span>
       ${Object.values(FX).join("")}<div class="floor"></div></div>
-    <div class="cap" id="stageCap"></div>
     <label class="themesel"><span class="sr-only">ธีมเทศกาล</span><select id="themeSel" class="inp" aria-label="ธีมเทศกาล">${OPT.map(([v, t]) => `<option value="${v}">${t}</option>`).join("")}</select></label>
     ${pet("", cat("#fdba74", "#fff7ed"), "mop", "--d:26s;--dl:0s;--x0:2%;--x1:64%;--f0:1;--f1:-1;bottom:-36px")}
     ${pet("dogB", dog("#c08457", "#f5e1c8", "#7c4a22"), "broom", "")}
@@ -800,7 +828,7 @@ function festivalOf(dt) {
   const apply = () => { let pref = "auto"; try { pref = localStorage.getItem("itl_theme") || "auto"; } catch {}
     const f = pref === "auto" ? festivalOf(new Date()) : pref === "none" ? "" : pref;
     if (f) document.documentElement.dataset.fest = f; else delete document.documentElement.dataset.fest;
-    $("#stageCap").textContent = GREET[f]; $("#themeSel").value = pref; };
+    $("#themeSel").value = pref; };
   $("#themeSel").onchange = e => { try { localStorage.setItem("itl_theme", e.target.value); } catch {} apply(); };
   apply();
 })();
