@@ -10,6 +10,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
   :root{--ink:#3b2f4a;--paper:#fff7fb;--card:#fff;--line:#f0e1f0;--muted:#8a7a99;--brand:#7c3aed;--wait:#d97706;--prog:#0284c7;--done:#059669;--bad:#e11d48}
   @media (prefers-color-scheme:dark){:root{--ink:#f3e8ff;--paper:#1b1626;--card:#251d33;--line:#3a2f4f;--muted:#b9a8d0;--brand:#c4b5fd}}
@@ -155,10 +157,10 @@ select.inp{appearance:none;padding-right:2.3rem;background-image:url("data:image
 <body>
 <header class="px-4 py-3" style="background:var(--hdr);color:var(--hdrfg)">
   <div class="max-w-6xl mx-auto"><h1 class="text-lg font-bold">🐾 ติดตามผลตรวจเวรวันหยุด</h1>
-  <p class="text-xs opacity-90">บริษัท ไอ-เทล คอร์ปอเรชั่น จำกัด (มหาชน) · ข้อมูลเก็บในเบราว์เซอร์เครื่องนี้ · ทีมสัตว์เลี้ยงทำความสะอาด 🐱🐶</p></div>
+  <p class="text-xs opacity-90">บริษัท ไอ-เทล คอร์ปอเรชั่น จำกัด (มหาชน) · ข้อมูลเก็บในเบราว์เซอร์เครื่องนี้ · ทีมสัตว์เลี้ยงทำความสะอาด 🐱🐶 <span id="syncBadge" class="ml-1 px-2 rounded-full" style="background:rgba(255,255,255,.6)">⏳ กำลังเชื่อมต่อ…</span></p></div>
 </header>
 <nav class="border-b" style="border-color:var(--line)"><div class="max-w-6xl mx-auto flex overflow-x-auto" role="tablist">
-  <button class="tab" data-v="day" role="tab">รายวัน</button><button class="tab" data-v="stat" role="tab">สถิติ</button><button class="tab" data-v="manage" role="tab">หมวดหมู่ / ผู้ปฏิบัติงาน</button>
+  <button class="tab" data-v="day" role="tab">รายวัน</button><button class="tab" data-v="stat" role="tab">สถิติ</button><button class="tab" data-v="manage" role="tab">หมวดหมู่ / ผู้รับผิดชอบ</button>
 </div></nav>
 <main class="max-w-6xl mx-auto p-3 sm:p-4 space-y-3">
   <section id="stage" class="stage" aria-label="ทีมสัตว์เลี้ยงทำความสะอาด"></section>
@@ -197,10 +199,10 @@ select.inp{appearance:none;padding-right:2.3rem;background-image:url("data:image
 
 <script>
 const KEY = {rec:"itl3_records", cat:"itl3_categories", wk:"itl3_workers"};
-const WAIT = "รอดำเนินการ", PROG = "กำลังดำเนินการ", CLOSED = "ปิดประเด็นแล้ว", STATUS = [WAIT, PROG, CLOSED];
+const WAIT = "รอติดตาม", PROG = "กำลังดำเนินการ", CLOSED = "ปิดประเด็นแล้ว", STATUS = [WAIT, PROG, CLOSED];
 const SC = {[WAIT]:"var(--wait)", [PROG]:"var(--prog)", [CLOSED]:"var(--done)"};
 const FALLBACK = "อื่นๆ";
-/* หมวดหมู่เริ่มต้น + คำสำคัญ (คั่นด้วย ,) — แก้ไขได้ในแท็บ "หมวดหมู่ / ผู้ปฏิบัติงาน" */
+/* หมวดหมู่เริ่มต้น + คำสำคัญ (คั่นด้วย ,) — แก้ไขได้ในแท็บ "หมวดหมู่ / ผู้รับผิดชอบ" */
 const DEF_CATS = [
   {name:"รั่วไหล", kw:"รั่ว,ซึม,หยด,leak,น้ำท่วม,น้ำขัง,คราบน้ำมัน,สารเคมีหก"},
   {name:"PPE", kw:"ppe,หมวก,แว่น,ถุงมือ,รองเท้า,ที่อุดหู,หน้ากาก,ชุดป้องกัน,ไม่สวม"},
@@ -212,18 +214,24 @@ const DEF_CATS = [
 ];
 /* ชื่อคอลัมน์ที่เป็นไปได้ของแต่ละฟิลด์: ex = ชื่อที่ตรงหรือมีคำนี้อยู่ (คะแนนสูง), kw = คำกว้างๆ (คะแนนต่ำ ใช้เมื่อไม่เจอชื่อตรง) */
 const FIELDS = {
+  order:{ex:["ลำดับ","ลำดับที่","เลขที่","item"], kw:["ลำดับ"]},
   date:{ex:["วันที่ตรวจ","วันที่","date","วัน-เวลา"], kw:["วัน","date"]},
-  inspector:{ex:["ผู้ตรวจสอบ","ผู้ตรวจ","inspector","ตรวจโดย"], kw:["ตรวจ","inspect"]},
+  zone:{ex:["zone","โซน"], kw:["โซน","zone"]},
   area:{ex:["พื้นที่ตรวจ","พื้นที่","จุดตรวจ","area","สถานที่","location"], kw:["พื้นที่","สถานที่","area","location"]},
-  zone:{ex:["โซน","zone"], kw:["โซน","zone"]},
+  result:{ex:["ผลตรวจ","ผลการตรวจ","พบ/ไม่พบ","สถานะ","status","result","ผล"], kw:["ผล","result","สถานะ"]},
   type:{ex:["ประเภทปัญหา","ประเภท","category","หมวดหมู่","type"], kw:["ประเภท","category","หมวด","type"]},
-  detail:{ex:["รายละเอียดที่พบ","รายละเอียด","ปัญหาที่พบ","detail","ปัญหา","สิ่งที่พบ","หมายเหตุ","remark"], kw:["รายละเอียด","detail","ปัญหา","หมายเหตุ","remark"]},
-  result:{ex:["ผลการตรวจ","ผลตรวจ","พบ/ไม่พบ","สถานะ","status","result","ผล"], kw:["ผล","สถานะ","status","result"]},
-  worker:{ex:["ผู้ปฏิบัติงาน","ผู้รับผิดชอบ","ผู้แก้ไข","ช่าง","worker"], kw:["ปฏิบัติ","รับผิดชอบ","ช่าง","worker"]},
+  detail:{ex:["รายละเอียดที่พบ","รายละเอียด","ปัญหาที่พบ","detail","ปัญหา","สิ่งที่พบ","remark"], kw:["รายละเอียด","detail","ปัญหา","remark"]},
+  onsite:{ex:["การแก้ไขณจุดตรวจ","แก้ไขณจุดตรวจ","การแก้ไขทันที","แก้ไขทันที"], kw:["ณจุดตรวจ","แก้ไขทันที"]},
+  measure:{ex:["มาตรการแก้ไขและติดตาม","มาตรการแก้ไข","มาตรการ"], kw:["มาตรการ","ติดตามผล"]},
+  worker:{ex:["ผู้รับผิดชอบ","ผู้ปฏิบัติงาน","ผู้แก้ไข","ช่าง","worker"], kw:["รับผิดชอบ","ปฏิบัติ","ช่าง","worker"]},
+  due:{ex:["กำหนดเสร็จ","กำหนดแล้วเสร็จ","duedate","due"], kw:["กำหนด","due"]},
+  fstatus:{ex:["สถานะติดตาม","สถานะการติดตาม"], kw:["สถานะติดตาม"]},
+  inspector:{ex:["ผู้ตรวจสอบ","ผู้ตรวจ","inspector","ตรวจโดย"], kw:["ตรวจ","inspect"]},
+  pdf:{ex:["หน้าpdf","pdfpage","หน้า"], kw:["pdf"]},
   stamp:{ex:["บันทึกเมื่อ","เวลาบันทึก","timestamp"], kw:["บันทึก","timestamp"]}
 };
-const FLABEL = {date:"วันที่", inspector:"ผู้ตรวจ", area:"พื้นที่", zone:"โซน", type:"ประเภทปัญหา", detail:"รายละเอียด", result:"ผลตรวจ/สถานะ", worker:"ผู้ปฏิบัติงาน", stamp:"บันทึกเมื่อ"};
-const FFALL = {date:"วันที่ในคอลัมน์ “บันทึกเมื่อ” หรือวันนี้", inspector:"ไม่ระบุ", area:"ไม่ระบุพื้นที่", zone:"(ไม่ใช้)", type:"-", detail:"ตรวจปกติ / ไม่ระบุรายละเอียด", result:"ดูจากรายละเอียด (มีข้อความ = พบปัญหา)", worker:"ไม่ระบุ", stamp:"-"};
+const FLABEL = {order:"ลำดับ", date:"วันที่ตรวจ", zone:"Zone", area:"พื้นที่ตรวจ", result:"ผลตรวจ", type:"ประเภทปัญหา", detail:"รายละเอียดที่พบ", onsite:"การแก้ไขณจุดตรวจ", measure:"มาตรการแก้ไขและติดตาม", worker:"ผู้รับผิดชอบ", due:"กำหนดเสร็จ", fstatus:"สถานะติดตาม", inspector:"ผู้ตรวจ", pdf:"หน้าPDF", stamp:"บันทึกเมื่อ"};
+const FFALL = {order:"นับตามแถว", date:"วันที่ใน “บันทึกเมื่อ” หรือวันนี้", zone:"(ไม่ใช้)", area:"ไม่ระบุพื้นที่", result:"ดูจากรายละเอียด (มีข้อความ = พบปัญหา)", type:"-", detail:"ตรวจปกติ / ไม่ระบุรายละเอียด", onsite:"(ว่าง)", measure:"(ว่าง)", worker:"ไม่ระบุ", due:"(ว่าง)", fstatus:"รอติดตาม", inspector:"ไม่ระบุ", pdf:"(ว่าง)", stamp:"-"};
 const PHOTO_RE = /รูป|ภาพ|photo|image|img|pic|ลิงก์รูป/i;
 const nh = x => norm(x).replace(/[:：.()\/\\\-_*,]/g, "");
 function mapCols(row) {   // จับคู่คอลัมน์ด้วยคะแนน แล้วจัดสรรแบบ greedy (ชื่อตรงก่อน, ไม่ให้ 1 คอลัมน์ถูกใช้ซ้ำ)
@@ -262,14 +270,70 @@ addEventListener("pagehide", flush); document.addEventListener("visibilitychange
 ["dragover","drop"].forEach(ev => addEventListener(ev, e => e.preventDefault()));
 const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) || d; } catch { return d; } };
 
-let recs = load(KEY.rec, []), cats = load(KEY.cat, DEF_CATS), workers = load(KEY.wk, []);
-if (!recs.length) { const old = load("itl_tracker_v2", []);   // ย้ายข้อมูลจากเวอร์ชันก่อนหน้า (ถ้ามี)
+/* ===== Firebase Firestore (ซิงค์ Real-time ทุกเครื่อง) ===== */
+const FIREBASE_CONFIG = {projectId:"it-duty-check-85e04"};   // Firestore ใช้เฉพาะ projectId ก็พอ (เพิ่ม apiKey/appId ได้ถ้ามี)
+const COL_T = "duty_tickets", SET_DOC = "duty_settings/main";
+let fdb = null, synced = false;
+try { if (window.firebase) { firebase.initializeApp(FIREBASE_CONFIG); fdb = firebase.firestore(); fdb.settings({ignoreUndefinedProperties:true, experimentalAutoDetectLongPolling:true, merge:true}); fdb.enablePersistence({synchronizeTabs:true}).catch(() => {}); } } catch (e) { console.warn(e); fdb = null; }
+let recs = fdb ? [] : load(KEY.rec, []), cats = load(KEY.cat, DEF_CATS), workers = load(KEY.wk, []);
+if (!fdb && !recs.length) { const old = load("itl_tracker_v2", []);   // ย้ายข้อมูลจากเวอร์ชันก่อนหน้า (ถ้ามี)
   recs = old.map(x => ({...x, result:"ab", subs:[], closedAt:x.status === CLOSED ? (x.createdAt || Date.now()) : null})); }
-function save() {
-  try { localStorage.setItem(KEY.rec, JSON.stringify(recs)); localStorage.setItem(KEY.cat, JSON.stringify(cats)); localStorage.setItem(KEY.wk, JSON.stringify(workers)); return true; }
-  catch { toast("พื้นที่เก็บข้อมูลเต็ม — ส่งออก Excel แล้วล้างข้อมูลเก่า"); return false; }
+function persistLocal() { try { localStorage.setItem(KEY.rec, JSON.stringify(recs)); localStorage.setItem(KEY.cat, JSON.stringify(cats)); localStorage.setItem(KEY.wk, JSON.stringify(workers)); return true; } catch { toast("พื้นที่เก็บข้อมูลเต็ม — ส่งออก Excel แล้วล้างข้อมูลเก่า"); return false; } }
+const base = new Map(), dirtyIds = new Set(); let lastSettings = "", settingsReady = false, pendingRender = false;
+const normStatus = v => { v = String(v ?? ""); return /ปิด/.test(v) ? CLOSED : /กำลัง/.test(v) ? PROG : WAIT; };
+const dstr = v => v && v.toDate ? v.toDate().toLocaleDateString("sv") : String(v || "");
+const cleanSub = (s, lite) => ({id:s.id, text:s.text || "", note:s.note || "", status:s.status, closedAt:s.closedAt || null, after:lite ? (s.after || []).map(u => u.length) : (s.after || [])});
+/* โครงสร้างเอกสารใน Firestore (Collection duty_tickets) */
+const toDoc = (r, lite) => ({"ลำดับ":r.order || 0, "วันที่ตรวจ":r.date || "", "Zone":r.zone || "", "พื้นที่ตรวจ":r.area || "", "ผลตรวจ":r.result === "ab" ? "พบสิ่งผิดปกติ" : "ปกติ",
+  "ประเภทปัญหา":r.type || "", "รายละเอียดที่พบ":r.detail || "", "รูปประกอบจากต้นฉบับ":r.orig || "", "การแก้ไขณจุดตรวจ":r.onsite || "", "มาตรการแก้ไขและติดตาม":r.note || "",
+  "ผู้รับผิดชอบ":r.worker || "", "กำหนดเสร็จ":r.due || "", "สถานะติดตาม":effStatus(r), "ผู้ตรวจ":r.inspector || "", "หน้าPDF":r.pdf || "",
+  ticket:r.ticket || "", category:r.category || "", closedAt:r.closedAt || null, stamp:r.stamp || "", createdAt:r.createdAt || 0,
+  subs:(r.subs || []).filter(s => !s.isNew).map(s => cleanSub(s, lite)), photos:lite ? (r.photos || []).map(u => u.length) : (r.photos || []), after:lite ? (r.after || []).map(u => u.length) : (r.after || [])});
+const fromDoc = (id, d) => ({id, order:d["ลำดับ"] || 0, date:dstr(d["วันที่ตรวจ"]), zone:d.Zone || "", area:d["พื้นที่ตรวจ"] || "", result:resultOf(d["ผลตรวจ"]) || "ok", type:d["ประเภทปัญหา"] || "", detail:d["รายละเอียดที่พบ"] || "",
+  orig:d["รูปประกอบจากต้นฉบับ"] || "", onsite:d["การแก้ไขณจุดตรวจ"] || "", note:d["มาตรการแก้ไขและติดตาม"] || "", worker:d["ผู้รับผิดชอบ"] || "", due:dstr(d["กำหนดเสร็จ"]), status:normStatus(d["สถานะติดตาม"]),
+  inspector:d["ผู้ตรวจ"] || "", pdf:d["หน้าPDF"] || "", ticket:d.ticket || "", category:d.category || "", closedAt:d.closedAt || null, stamp:d.stamp || "", createdAt:d.createdAt || 0,
+  subs:(d.subs || []).map(s => ({note:"", after:[], ...s})), photos:d.photos || [], after:d.after || []});
+const sigOf = r => JSON.stringify(toDoc(r, true));
+function setSync(st, n) { const el = document.getElementById("syncBadge"); if (!el) return;
+  el.textContent = {load:"⏳ กำลังเชื่อมต่อ Firebase…", ok:`🟢 ซิงค์ Real-time · ${n ?? recs.length} รายการ`, cache:"🟡 ออฟไลน์ — ใช้ข้อมูลในเครื่อง", err:"🔴 เชื่อมต่อ Firebase ไม่ได้", local:"💾 โหมดเครื่องนี้ (ไม่มี Firebase)"}[st] || ""; }
+async function commitOps(ops) {   // db.batch(): เขียนทีละไม่เกิน 400 รายการ / ~3MB ต่อชุด
+  let batch = fdb.batch(), n = 0, bytes = 0, pend = [];
+  const flushB = async () => { if (!n) return; const b = batch, ids = pend; batch = fdb.batch(); n = 0; bytes = 0; pend = [];
+    try { await b.commit(); } catch (e) { ids.forEach(id => base.delete(id)); setSync("err"); toast("บันทึกขึ้น Firebase ไม่สำเร็จ: " + (e.code || e.message)); } };
+  for (const o of ops) { const ref = fdb.collection(COL_T).doc(o.id), sz = o.del ? 0 : JSON.stringify(o.data).length; if (n >= 400 || bytes + sz > 3e6) await flushB();
+    o.del ? batch.delete(ref) : batch.set(ref, o.data, {merge:true}); n++; bytes += sz; pend.push(o.id); }
+  await flushB();
 }
-
+function saveSettings() { if (!settingsReady) return; const s = JSON.stringify({categories:cats, workers}); if (s === lastSettings) return; lastSettings = s;
+  fdb.doc(SET_DOC).set({categories:cats, workers, updatedAt:firebase.firestore.FieldValue.serverTimestamp()}).catch(e => toast("บันทึกการตั้งค่าไม่สำเร็จ: " + (e.code || e.message))); }
+function save() {   // เขียนเฉพาะรายการ/ฟิลด์ที่เปลี่ยน (ไม่ทับงานของเครื่องอื่น)
+  if (!fdb) return persistLocal();
+  const ts = firebase.firestore.FieldValue.serverTimestamp(), ops = [], ids = new Set(recs.map(r => r.id));
+  for (const r of recs) { const b = base.get(r.id), sg = sigOf(r); if (b && b.sig === sg) continue;
+    const full = toDoc(r), old = b ? b.doc : {}, ch = {}; for (const k of Object.keys(full)) if (!b || JSON.stringify(full[k]) !== JSON.stringify(old[k])) ch[k] = full[k];
+    ops.push({id:r.id, data:{...ch, updatedAt:ts}}); base.set(r.id, {doc:full, sig:sg}); }
+  [...base.keys()].filter(id => !ids.has(id)).forEach(id => { ops.push({id, del:true}); base.delete(id); });
+  dirtyIds.clear(); if (ops.length) commitOps(ops); saveSettings(); return true;
+}
+const typing = () => { const a = document.activeElement; return !!a && !!document.getElementById("view")?.contains(a) && (a.tagName === "TEXTAREA" || (a.tagName === "INPUT" && a.type !== "checkbox")); };
+const rerender = () => { if (typing()) pendingRender = true; else render(); };
+document.addEventListener("focusout", () => setTimeout(() => { if (pendingRender && !typing()) { pendingRender = false; render(); } }, 80));
+function startSync() {
+  if (!fdb) { setSync("local"); synced = true; return; }
+  setSync("load");
+  fdb.collection(COL_T).onSnapshot(snap => {     // Auto-load ครั้งแรก + ฟังการเปลี่ยนแปลงแบบ Real-time
+    const idx = new Map(recs.map((r, i) => [r.id, i])); let changed = !synced;
+    snap.docChanges().forEach(ch => { const id = ch.doc.id;
+      if (ch.type === "removed") { const i = idx.get(id); if (i !== undefined) { recs[i] = null; idx.delete(id); changed = true; } base.delete(id); return; }
+      if (dirtyIds.has(id)) return;   // กำลังพิมพ์แก้ไขอยู่ — รอบันทึกก่อน
+      const data = ch.doc.data(), r = fromDoc(id, data), i = idx.get(id);
+      if (i !== undefined && recs[i]) { r.subs.push(...recs[i].subs.filter(s => s.isNew)); recs[i] = r; } else { idx.set(id, recs.length); recs.push(r); }
+      base.set(id, {doc:data, sig:sigOf(r)}); changed = true; });
+    recs = recs.filter(Boolean); synced = true; setSync(snap.metadata.fromCache && !snap.size ? "cache" : "ok", recs.length); if (changed) rerender();
+  }, err => { setSync("err"); toast(err.code === "permission-denied" ? "Firestore ไม่อนุญาตให้อ่านข้อมูล — ตรวจสอบ Rules ของโปรเจกต์" : "เชื่อมต่อ Firebase ไม่ได้: " + (err.code || err.message)); });
+  fdb.doc(SET_DOC).onSnapshot(sn => { settingsReady = true; if (sn.exists) { const d = sn.data(); if (d.categories && d.categories.length) cats = d.categories; if (d.workers) workers = d.workers; }
+    lastSettings = JSON.stringify({categories:cats, workers}); rerender(); }, () => { settingsReady = false; });
+}
 /* ===== ตรรกะสถานะ / ข้อย่อย ===== */
 const effStatus = r => { if (!r.subs.length) return r.status; const s = r.subs.map(x => x.status);
   return s.every(x => x === CLOSED) ? CLOSED : s.every(x => x === WAIT) ? WAIT : PROG; };
@@ -306,9 +370,9 @@ function resultOf(v) {   // "ab" = พบสิ่งผิดปกติ, "ok"
 const imgUrl = u => { const m = u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=)([\w-]+)/); return m ? `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1000` : u; };
 function shrinkBlob(blob) {
   return new Promise(res => { const u = URL.createObjectURL(blob), i = new Image();
-    i.onload = () => { const k = Math.min(1, 640 / Math.max(i.width, i.height)), c = document.createElement("canvas");
+    i.onload = () => { const k = Math.min(1, 560 / Math.max(i.width, i.height)), c = document.createElement("canvas");
       c.width = Math.round(i.width * k); c.height = Math.round(i.height * k); c.getContext("2d").drawImage(i, 0, 0, c.width, c.height);
-      URL.revokeObjectURL(u); res(c.toDataURL("image/jpeg", .65)); };
+      URL.revokeObjectURL(u); res(c.toDataURL("image/jpeg", .6)); };
     i.onerror = () => res(null); i.src = u; });
 }
 async function extractImages(buf, sheetNo) {
@@ -331,7 +395,7 @@ async function extractImages(buf, sheetNo) {
   return out;
 }
 async function importFile(file) {
-  if (!file) return; toast("กำลังอ่านไฟล์…");
+  if (!file) return; if (fdb && !synced) return toast("กำลังโหลดข้อมูลจาก Firebase… กรุณารอสักครู่แล้วลองใหม่"); toast("กำลังอ่านไฟล์…");
   try {
     const buf = await file.arrayBuffer(), wb = XLSX.read(buf, {type:"array", cellDates:true});
     let F = null;
@@ -358,7 +422,7 @@ async function importFile(file) {
     const imgs = await extractImages(buf, si + 1), today = new Date().toLocaleDateString("sv");
     const have = new Set(recs.map(x => x.id)), seq = {}, seen = {};
     recs.forEach(x => { if (x.ticket) { const [, d, n] = x.ticket.split("-"); seq[d] = Math.max(seq[d] || 0, +n); } });
-    let add = 0, ab = 0, dup = 0, guessed = 0;
+    let add = 0, ab = 0, dup = 0, guessed = 0, trimmed = 0;
     for (let i = h + 1; i < rows.length; i++) {
       const r = rows[i]; if (!r.some(c => String(c).trim())) continue;
       const g = k => col[k] >= 0 ? txt(r[col[k]]) : "", detail = g("detail"), rv = g("result");
@@ -371,9 +435,12 @@ async function importFile(file) {
       if (clean(worker) && !workers.includes(worker)) workers.push(worker);
       const urls = pc.map(c => txt(r[c])).filter(u => /^https?:|^data:image/.test(u)).map(imgUrl);
       const emb = res === "ab" ? (imgs[i + r0] || []).sort((a, b) => a.col - b.col).map(x => x.url) : [];
-      const rec = {id, date, inspector:clean(g("inspector")) || "ไม่ระบุ", area:clean(g("area")), zone:clean(g("zone")), type:clean(g("type")) || "-",
-        detail:res === "ab" ? (detail || "ไม่ระบุรายละเอียด") : detail, worker:clean(worker), stamp:g("stamp"),
-        result:res, category:res === "ab" ? classify(g("type") + " " + detail) : "", photos:[...urls, ...emb], status:WAIT, closedAt:null, subs:[], note:"", createdAt:Date.now()};
+      const stt = col.fstatus >= 0 ? normStatus(g("fstatus")) : WAIT;
+      const rec = {id, order:Number(g("order")) || (i - h), date, inspector:clean(g("inspector")) || "ไม่ระบุ", area:clean(g("area")), zone:clean(g("zone")), type:clean(g("type")) || "-",
+        detail:res === "ab" ? (detail || "ไม่ระบุรายละเอียด") : detail, orig:pc.map(c => txt(r[c])).filter(Boolean).join(", "), onsite:g("onsite"), note:g("measure"),
+        worker:clean(worker), due:toISO(col.due >= 0 ? r[col.due] : ""), pdf:g("pdf"), stamp:g("stamp"), result:res, category:res === "ab" ? classify(g("type") + " " + detail) : "",
+        photos:[...urls, ...emb], status:stt, closedAt:stt === CLOSED ? Date.now() : null, subs:[], after:[], createdAt:Date.now()};
+      while (rec.photos.length && JSON.stringify(toDoc(rec)).length > 900000) { rec.photos.pop(); trimmed++; }   // เอกสาร Firestore จำกัด 1MB
       if (res === "ab") { const d8 = date.replace(/-/g, ""); seq[d8] = (seq[d8] || 0) + 1; rec.ticket = `ITL-${d8}-${String(seq[d8]).padStart(3, "0")}`; ab++; }
       recs.push(rec); have.add(id); add++;
     }
@@ -381,7 +448,7 @@ async function importFile(file) {
     box.innerHTML = `<summary class="cursor-pointer font-semibold">ผลการจับคู่คอลัมน์ (ชีต “${esc(wb.SheetNames[si])}” · แถวหัวตารางที่ ${h + 1 + r0})</summary><div class="grid sm:grid-cols-2 gap-x-4 gap-y-1 mt-2">
       ${Object.keys(FIELDS).map(k => `<div>${FLABEL[k]}: ${col[k] >= 0 ? `<b>${esc(head[col[k]])}</b> <span style="color:var(--muted)">(${how[k]})</span>` : `<span style="color:var(--wait)">ไม่พบ → ใช้ค่าสำรอง: ${FFALL[k]}</span>`}</div>`).join("")}
       <div>รูปภาพ: ${pc.length ? `<b>${pc.map(i => esc(head[i])).join(", ")}</b>` : `<span style="color:var(--muted)">ไม่พบคอลัมน์รูป (ดึงเฉพาะรูปที่แทรกในชีต)</span>`}</div></div>`;
-    if (save()) toast(`นำเข้า ${add} แถว (พบปัญหา ${ab}) · ข้ามซ้ำ ${dup}${guessed ? " · เดาผลจากรายละเอียด " + guessed : ""}`);
+    if (save()) toast(`นำเข้า ${add} แถว (พบปัญหา ${ab}) · ข้ามซ้ำ ${dup}${guessed ? " · เดาผลจากรายละเอียด " + guessed : ""}${trimmed ? " · ตัดรูปที่เกินขนาด " + trimmed + " รูป" : ""}`);
     render();
   } catch (e) { toast("อ่านไฟล์ไม่สำเร็จ: " + e.message); }
 }
@@ -391,11 +458,9 @@ const drop = $("#drop");
 ["dragleave","drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
 drop.addEventListener("drop", e => importFile(e.dataTransfer.files[0]));
 $("#tpl").onclick = () => {
-  const d = new Date().toLocaleDateString("sv"), t = new Date().toLocaleString("th-TH"), H = ["วันที่","ผู้ตรวจ","พื้นที่","โซน","ประเภทปัญหา","รายละเอียด","สถานะ","ผู้ปฏิบัติงาน","บันทึกเมื่อ","รูปที่ 1","รูปที่ 2","รูปที่ 3","รูปที่ 4","รูปที่ 5"];
-  const ws = XLSX.utils.aoa_to_sheet([H,
-    [d,"สมชาย","คลังสินค้า","โซน A","ไฟฟ้า","1. หลอดไฟดับ 3 ดวง\n2. แอร์เปิดทิ้งไว้\n3. พบน้ำหยดใต้ท่อ","พบสิ่งผิดปกติ","สมศักดิ์",t],
-    [d,"สมชาย","อาคารผลิต","โซน B","","","ไม่พบสิ่งผิดปกติ","",t], [d,"สมหญิง","ลานจอดรถ","โซน C","","","ไม่พบสิ่งผิดปกติ","",t],
-    [d,"สมหญิง","โรงอาหาร","โซน D","ความปลอดภัย","พนักงานไม่สวมแว่นตานิรภัย","พบสิ่งผิดปกติ","สมศักดิ์",t]]);
+  const d = new Date().toLocaleDateString("sv"), H = ["ลำดับ","วันที่ตรวจ","Zone","พื้นที่ตรวจ","ผลตรวจ","ประเภทปัญหา","รายละเอียดที่พบ","รูปประกอบจากต้นฉบับ","การแก้ไขณจุดตรวจ","มาตรการแก้ไขและติดตาม","ผู้รับผิดชอบ","กำหนดเสร็จ","สถานะติดตาม","ผู้ตรวจ","หน้าPDF"];
+  const ws = XLSX.utils.aoa_to_sheet([H, [1, d, "Zone5", "บรรจุ", "พบสิ่งผิดปกติ", "ไฟฟ้า", "1. หลอดไฟดับ 3 ดวง\n2. แอร์เปิดทิ้งไว้", "", "ปิดแอร์แล้ว", "ซ่อมหลอดไฟภายในสัปดาห์นี้", "สมศักดิ์", d, "รอติดตาม", "สมชาย", 3],
+    [2, d, "Zone10", "Retort", "ปกติ", "", "", "", "", "", "", "", "", "สมชาย", 3], [3, d, "Zone10", "สโตร์", "พบสิ่งผิดปกติ", "รั่วไหล", "พบน้ำหยดใต้ท่อ", "", "", "", "", "", "รอติดตาม", "สมหญิง", 4]]);
   const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "ตรวจเวร"); saveWb(wb, "ตัวอย่างไฟล์ตรวจเวร.xlsx");
 };
 
@@ -445,7 +510,7 @@ function vDay() {
     <select id="fa" class="inp" aria-label="ตัวกรองพื้นที่/จุดตรวจ"><option value="">ทุกพื้นที่ / จุดตรวจ</option>${as.map(z => `<option ${z === fa ? "selected" : ""}>${esc(z)}</option>`).join("")}</select>
     <select id="fc" class="inp" aria-label="ค้นหาตามหมวดหมู่"><option value="">ทุกหมวดหมู่</option>${cs.map(c => `<option ${c === fc ? "selected" : ""}>${esc(c)}</option>`).join("")}</select>
     <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="showOk" ${showOk ? "checked" : ""}> แสดงจุดที่ปกติ</label></div>
-    <div class="space-y-4">${html || `<p class="card p-4" style="color:var(--muted)">${recs.length ? "ไม่พบรายการตามตัวกรอง" : "🐶🐱 ยังไม่ได้นำเข้าข้อมูล — อัปโหลดไฟล์ตรวจเวรด้านบน แล้วทีมสัตว์เลี้ยงจะช่วยตามงานให้"}</p>`}</div>`;
+    <div class="space-y-4">${html || `<p class="card p-4" style="color:var(--muted)">${recs.length ? "ไม่พบรายการตามตัวกรอง" : !synced ? "⏳ กำลังโหลดข้อมูลจาก Firebase…" : "🐶🐱 ยังไม่มีข้อมูล — อัปโหลดไฟล์ตรวจเวรด้านบน ทุกเครื่องจะเห็นข้อมูลตรงกันทันที"}</p>`}</div>`;
 }
 const RB = "background:rgba(0,0,0,.65);color:#fff;border-radius:999px;width:1.6rem;height:1.6rem";
 const zone = (dz, arr, title, color, cam) => `<div data-drop="${dz}" tabindex="0" class="zone rounded-2xl p-4 space-y-3" style="border:1.5px dashed color-mix(in srgb,${color} 50%,var(--line));background:color-mix(in srgb,${color} 4%,transparent)" aria-label="${title}">
@@ -455,6 +520,7 @@ const zone = (dz, arr, title, color, cam) => `<div data-drop="${dz}" tabindex="0
   ${arr.length ? `<div class="grid grid-cols-4 sm:grid-cols-5 gap-2">${arr.map((u, i) => `<div class="relative"><button class="photo w-full" data-act="ph" data-dz="${dz}" data-i="${i}" aria-label="ดูรูปที่ ${i + 1}"><img src="${esc(u)}" alt="${title} ${i + 1}" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'โหลดรูปไม่ได้',className:'text-xs p-1 block'}))"></button><button class="absolute top-1 right-1 text-xs" style="${RB}" data-act="delph" data-dz="${dz}" data-i="${i}" aria-label="ลบรูป">✕</button></div>`).join("")}</div>`
    : `<p class="text-xs" style="color:var(--muted)">ลากรูปมาวาง หรือคลิกกรอบแล้วกด Ctrl+V</p>`}
   <details class="text-xs"><summary class="cursor-pointer" style="color:var(--muted)">เพิ่มจากลิงก์รูป</summary><div class="flex gap-1 mt-2"><input class="inp" data-url="1" placeholder="https://…"><button class="btn2" data-act="addurl" data-dz="${dz}">เพิ่ม</button></div></details></div>`;
+const late = x => !!x.due && effStatus(x) !== CLOSED && x.due < new Date().toLocaleDateString("sv");
 function card(x) {
   const st = effStatus(x), ca = closedAtOf(x), subs = x.subs, can = parseSubs(x.detail).length >= 2, done = st === CLOSED;
   const sub = (s, i) => { const cl = s.status === CLOSED, ed = editSubs.has(s.id), dr = drafts.get(s.id) || {text:s.text, note:s.note || ""}, ro = ed ? "" : "readonly";
@@ -470,22 +536,25 @@ function card(x) {
       ${ed ? `<p class="text-xs" style="color:var(--prog)">กำลังแก้ไข — ข้อความจะยังไม่ถูกบันทึกจนกว่าจะกด “บันทึก”</p>` : ""}
       ${zone(`${x.id}|${s.id}|after`, s.after || [], "รูปหลังแก้ไข (After)", "var(--done)", true)}</div>`; };
   return `<article class="card p-5 space-y-4 ${flashId === x.id ? "flash" : ""}" data-id="${x.id}" style="border-left:5px solid ${SC[st]};${done ? "opacity:.88" : ""}">
-    <div class="flex flex-wrap items-center justify-between gap-2"><b class="font-mono text-sm">${done ? "✓ " : ""}${esc(x.ticket)}</b>${statusPill(st)}</div>
+    <div class="flex flex-wrap items-center justify-between gap-2"><b class="font-mono text-sm">${x.order ? "#" + x.order + " · " : ""}${done ? "✓ " : ""}${esc(x.ticket)}</b><span class="flex gap-1">${late(x) ? `<span class="pill" style="background:var(--bad)">เกินกำหนด</span>` : ""}${statusPill(st)}</span></div>
     <h3 class="font-semibold">${esc(ptKey(x))}</h3>
-    <p class="text-xs" style="color:var(--muted)">ผู้ตรวจ ${esc(x.inspector || "-")}${x.type ? " · " + esc(x.type) : ""}${x.stamp ? " · บันทึก " + esc(x.stamp) : ""}</p>
+    <p class="text-xs" style="color:var(--muted)">ผู้ตรวจ ${esc(x.inspector || "-")}${x.type ? " · " + esc(x.type) : ""}${x.stamp ? " · บันทึก " + esc(x.stamp) : ""}${x.pdf ? " · หน้า PDF " + esc(x.pdf) : ""}</p>
     ${subs.length ? "" : `<label class="block text-xs font-semibold">รายละเอียดปัญหา <span class="font-normal" style="color:var(--muted)">(แก้ไขพิมพ์ทับได้ · บันทึกอัตโนมัติ)</span><textarea class="inp font-normal" rows="3" data-f="detail">${esc(x.detail)}</textarea></label>`}
     ${zone(`${x.id}||photos`, x.photos, "รูปภาพหลักฐาน (Before)", "var(--wait)", false)}
+    ${x.orig ? `<p class="text-xs" style="color:var(--muted)">รูปประกอบจากต้นฉบับ: ${/^https?:\/\/\S+$/.test(x.orig) ? `<a class="underline" style="color:var(--brand)" href="${esc(x.orig)}" target="_blank" rel="noopener">${esc(x.orig)}</a>` : esc(x.orig)}</p>` : ""}
     ${subs.length ? "" : zone(`${x.id}||after`, x.after || [], "รูปหลังแก้ไข (After)", "var(--done)", true)}
+    <label class="block text-xs font-semibold">การแก้ไข ณ จุดตรวจ <span class="font-normal" style="color:var(--muted)">(แก้ไขทันที · บันทึกอัตโนมัติ)</span><textarea class="inp font-normal" rows="2" data-f="onsite" placeholder="สิ่งที่แก้ไขทันที ณ จุดตรวจ">${esc(x.onsite)}</textarea></label>
     <div class="grid grid-cols-2 gap-2">
       <label class="text-xs">หมวดหมู่<select class="inp" data-f="category">${opt(cats.map(c => c.name), x.category)}</select></label>
-      <label class="text-xs">ผู้ปฏิบัติงาน<select class="inp" data-f="worker">${opt(workers, x.worker, "ไม่ระบุ")}</select></label></div>
+      <label class="text-xs">ผู้รับผิดชอบ<select class="inp" data-f="worker">${opt(workers, x.worker, "ไม่ระบุ")}</select></label>
+      <label class="text-xs">กำหนดเสร็จ<input type="date" class="inp" data-f="due" value="${esc(x.due)}" style="${late(x) ? "border-color:var(--bad)" : ""}"></label></div>
     ${subs.length ? `<div class="space-y-2"><p class="text-xs font-semibold">ข้อย่อย (${subs.filter(s => s.status === CLOSED).length}/${subs.length} ปิดแล้ว) — ล็อกไว้ ต้องกด “แก้ไข” แล้ว “บันทึก”</p>${subs.map(sub).join("")}</div>`
     : `<div class="seg flex" role="group" aria-label="สถานะ">${STATUS.map(s => `<button data-act="st" data-id="${x.id}" data-s="${s}" aria-pressed="${s === x.status}" style="${s === x.status ? "background:" + SC[s] + ";border-color:" + SC[s] : ""}">${s}</button>`).join("")}</div>`}
     ${ca ? `<p class="text-xs font-semibold" style="color:var(--done)">ปิดประเด็นเมื่อ ${fmtT(ca)}</p>` : ""}
     <div class="flex flex-wrap gap-2 text-sm">
       ${subs.length ? `<button class="btn2" data-act="unsplit" data-id="${x.id}">ยกเลิกการแยกข้อย่อย</button>` : `<button class="btn2" data-act="split" data-id="${x.id}" ${can ? "" : 'title="ไม่พบการเรียงเป็นข้อๆ ในรายละเอียด"'}>แยกเป็นข้อย่อย</button>`}
       <button class="btn2" data-act="addsub" data-id="${x.id}">+ เพิ่มข้อย่อย</button></div>
-    <label class="block text-xs font-semibold">${subs.length ? "บันทึกการดำเนินการรวม" : "รายละเอียดการดำเนินการ"}<textarea class="inp font-normal" rows="${st === PROG && !subs.length ? 3 : 2}" data-f="note" placeholder="ระบุสิ่งที่ทำ / ผู้ติดตาม / กำหนดเสร็จ" style="${st === PROG ? "border-color:var(--prog)" : ""}">${esc(x.note)}</textarea></label>
+    <label class="block text-xs font-semibold">${subs.length ? "มาตรการแก้ไขและติดตาม (รวม)" : "มาตรการแก้ไขและติดตาม"}<textarea class="inp font-normal" rows="${st === PROG && !subs.length ? 3 : 2}" data-f="note" placeholder="ระบุสิ่งที่ทำ / ผู้ติดตาม / กำหนดเสร็จ" style="${st === PROG ? "border-color:var(--prog)" : ""}">${esc(x.note)}</textarea></label>
     <button class="btn2 btn-del text-xs" data-act="del" data-id="${x.id}">ลบรายการนี้</button></article>`;
 }
 
@@ -515,7 +584,7 @@ function vStat() {
         ${o ? `<div class="pb-2 pl-3 space-y-1 text-sm">${p.items.sort((a, b) => b.date.localeCompare(a.date)).map(r => `<div class="flex flex-wrap justify-between gap-2"><span><b>${fmtD(r.date)}</b> · ${esc(r.subs.length ? r.subs.map((s, i) => `${i + 1}) ${s.text}`).join(" ") : r.detail || "-")}</span>${statusPill(effStatus(r))}</div>`).join("") || `<span style="color:var(--muted)">ไม่เคยพบปัญหา</span>`}</div>` : ""}</div>`; }).join("") || `<p style="color:var(--muted)">ไม่พบจุดตรวจ</p>`}</section>`;
 }
 
-/* ----- แท็บหมวดหมู่ / ผู้ปฏิบัติงาน ----- */
+/* ----- แท็บหมวดหมู่ / ผู้รับผิดชอบ ----- */
 function vManage() {
   const cu = n => recs.filter(r => r.category === n).length, wu = n => recs.filter(r => r.worker === n).length;
   return `<div class="grid lg:grid-cols-2 gap-3">
@@ -526,10 +595,10 @@ function vManage() {
       <div class="text-center text-xs">${cu(c.name)} รายการ<br>${c.name === FALLBACK ? "" : `<button class="btn2 mt-1" style="color:var(--bad)" data-act="delcat" data-i="${i}">ลบ</button>`}</div></div>`).join("")}
     <div class="grid grid-cols-[1fr_auto] gap-2"><input id="newCat" class="inp" placeholder="ชื่อหมวดหมู่ใหม่"><button class="btn" data-act="addcat">+ เพิ่ม</button></div>
     <button class="btn2 text-sm" data-act="reclass">จัดหมวดหมู่ใหม่ให้ทุกรายการอัตโนมัติ</button></section>
-  <section class="card p-3 space-y-2"><h2 class="font-semibold">ผู้ปฏิบัติงาน</h2><p class="text-xs" style="color:var(--muted)">รายชื่อถูกดึงจากคอลัมน์ “ผู้ปฏิบัติงาน” ในไฟล์ Excel อัตโนมัติ · การเปลี่ยนชื่อจะอัปเดตทุกรายการ</p>
-    ${workers.map((w, i) => `<div class="grid grid-cols-[1fr_auto_auto] gap-2 items-center"><input class="inp" data-f="wkname" data-i="${i}" value="${esc(w)}" aria-label="ชื่อผู้ปฏิบัติงาน">
+  <section class="card p-3 space-y-2"><h2 class="font-semibold">ผู้รับผิดชอบ</h2><p class="text-xs" style="color:var(--muted)">รายชื่อถูกดึงจากคอลัมน์ “ผู้รับผิดชอบ” ในไฟล์ Excel อัตโนมัติ · การเปลี่ยนชื่อจะอัปเดตทุกรายการ</p>
+    ${workers.map((w, i) => `<div class="grid grid-cols-[1fr_auto_auto] gap-2 items-center"><input class="inp" data-f="wkname" data-i="${i}" value="${esc(w)}" aria-label="ชื่อผู้รับผิดชอบ">
       <span class="text-xs">${wu(w)} รายการ</span><button class="btn2" style="color:var(--bad)" data-act="delwk" data-i="${i}">ลบ</button></div>`).join("") || `<p class="text-sm" style="color:var(--muted)">ยังไม่มีรายชื่อ</p>`}
-    <div class="grid grid-cols-[1fr_auto] gap-2"><input id="newWk" class="inp" placeholder="ชื่อผู้ปฏิบัติงานใหม่"><button class="btn" data-act="addwk">+ เพิ่ม</button></div></section></div>`;
+    <div class="grid grid-cols-[1fr_auto] gap-2"><input id="newWk" class="inp" placeholder="ชื่อผู้รับผิดชอบใหม่"><button class="btn" data-act="addwk">+ เพิ่ม</button></div></section></div>`;
 }
 
 /* ===== เหตุการณ์ ===== */
@@ -572,13 +641,13 @@ V.addEventListener("click", async e => {
 V.addEventListener("change", e => {
   const t = e.target, f = t.dataset.f; if (t.dataset.addfile) { addPhotos(t.dataset.addfile, t.files); t.value = ""; return; } if (!f) { if (t.id === "fst") { fst = t.value; render(); } else if (t.id === "fz") { fz = t.value; render(); } else if (t.id === "fa") { fa = t.value; render(); } else if (t.id === "fc") { fc = t.value; render(); } else if (t.id === "showOk") { showOk = t.checked; render(); } return; }
   const r = recs.find(x => x.id === t.closest("article")?.dataset.id), s = r && t.dataset.sid && r.subs.find(x => x.id === t.dataset.sid), v = t.value.trim();
-  if (f === "category" || f === "worker") r[f] = t.value;
+  if (f === "category" || f === "worker" || f === "due") r[f] = t.value;
   else if (f === "note") r.note = t.value;
   else if (f === "substatus") { setStatus(s, t.value); if (t.value === CLOSED) flashId = r.id; save(); return render(); }
   else if (f === "catname") { const c = cats[+t.dataset.i]; if (!v || cats.some(x => x !== c && x.name === v)) { toast("ชื่อว่างหรือซ้ำ"); return render(); } recs.forEach(x => { if (x.category === c.name) x.category = v; }); c.name = v; }
   else if (f === "catkw") cats[+t.dataset.i].kw = t.value;
   else if (f === "wkname") { const i = +t.dataset.i, o = workers[i]; if (!v || workers.some((w, j) => j !== i && w === v)) { toast("ชื่อว่างหรือซ้ำ"); return render(); } recs.forEach(x => { if (x.worker === o) x.worker = v; }); workers[i] = v; }
-  save(); if (f === "catname" || f === "wkname") render();
+  save(); if (f === "catname" || f === "wkname" || f === "due") render();
 });
 const addPhotos = async (dz, files) => { const arr = arrOf(dz), imgs = [...files].filter(f => f.type.startsWith("image/"));
   if (!arr) return; if (!imgs.length) return toast("ไม่พบไฟล์รูปภาพ"); toast("กำลังเพิ่มรูป…");
@@ -589,12 +658,12 @@ V.addEventListener("paste", e => { const fs = [...(e.clipboardData?.files || [])
 V.addEventListener("dragleave", e => { const z = e.target.closest?.("[data-drop]"); if (z && !z.contains(e.relatedTarget)) z.classList.remove("dz-over"); });
 V.addEventListener("drop", e => { const z = e.target.closest?.("[data-drop]"); if (z) { z.classList.remove("dz-over"); addPhotos(z.dataset.drop, e.dataTransfer.files); } });
 V.addEventListener("input", e => {
-  const t = e.target, f = t.dataset.f; if (!["detail","note","subtext","subnote"].includes(f)) return;
+  const t = e.target, f = t.dataset.f; if (!["detail","onsite","note","subtext","subnote"].includes(f)) return;
   if (f === "subtext" || f === "subnote") { const d = drafts.get(t.dataset.sid); if (d) d[f === "subtext" ? "text" : "note"] = t.value; return; }   // ข้อย่อย: เป็นฉบับร่าง จนกว่าจะกด “บันทึก”
-  const r = recs.find(x => x.id === t.closest("article")?.dataset.id); if (!r) return; r[f] = t.value; saveSoon(); });
+  const r = recs.find(x => x.id === t.closest("article")?.dataset.id); if (!r) return; r[f] = t.value; dirtyIds.add(r.id); saveSoon(); });
 V.addEventListener("input", e => { if (e.target.id === "q") { q = e.target.value; clearTimeout(V._t); V._t = setTimeout(() => { render(); const el = $("#q"); el.focus(); el.setSelectionRange(q.length, q.length); }, 300); }
   if (e.target.id === "ptq") { ptq = e.target.value; clearTimeout(V._t); V._t = setTimeout(() => { render(); const el = $("#ptq"); el.focus(); el.setSelectionRange(ptq.length, ptq.length); }, 300); } });
-$("#clr").onclick = async () => { if (recs.length && await ask("ล้างข้อมูลตรวจเวรทั้งหมดในเครื่องนี้? (หมวดหมู่และรายชื่อผู้ปฏิบัติงานจะคงไว้ — ควรส่งออก Excel ก่อน)")) { recs = []; save(); render(); } };
+$("#clr").onclick = async () => { if (recs.length && await ask((fdb ? "ล้างข้อมูลตรวจเวรทั้งหมด? ข้อมูลบน Firebase จะถูกลบและหายจากทุกเครื่อง (หมวดหมู่และรายชื่อผู้รับผิดชอบคงไว้) — ควรส่งออก Excel ก่อน" : "ล้างข้อมูลตรวจเวรทั้งหมดในเครื่องนี้? (หมวดหมู่และรายชื่อผู้รับผิดชอบจะคงไว้ — ควรส่งออก Excel ก่อน)"))) { recs = []; save(); render(); } };
 
 /* ===== Lightbox ===== */
 let lb = {list:[], i:0};
@@ -623,11 +692,11 @@ function exportXlsx(o) {
   put("ภาพรวม", [["รายงานสรุปผลตรวจเวรวันหยุด"], [`ช่วงวันที่ ${o.from} ถึง ${o.to}`], [], ["ตัวชี้วัด", "ค่า"], ...kpis(D)], [34, 14]);
   const g = (m, h) => [[h, "ตรวจ (จุด)", "พบปัญหา", "% พบปัญหา", "งานค้าง"], ...m.map(([k, v]) => [k, v.n, v.a, pct(v.a, v.n), v.o])];
   put("สรุปรายวัน", g(byKey(D, r => r.date), "วันที่"), [14, 12, 10, 12, 10]); put("สรุปรายพื้นที่", g(byKey(D, ptKey), "พื้นที่/จุดตรวจ"), [30, 12, 10, 12, 10]);
-  const L = [["เลขที่ใบงาน","วันที่ตรวจ","จุดตรวจ","ผู้ตรวจ","หมวดหมู่","ผู้ปฏิบัติงาน","ข้อ","รายละเอียด","สถานะ","ปิดประเด็นเมื่อ","บันทึกการดำเนินการ","รูป Before","รูป After"]];
-  D.list.forEach(r => { const base = [r.ticket, r.date, ptKey(r), r.inspector, r.category, r.worker];
-    if (r.subs.length) r.subs.forEach((x, i) => L.push([...base, i + 1, x.text, x.status, x.closedAt ? fmtT(x.closedAt) : "", [r.note, x.note].filter(Boolean).join(" | "), i ? "" : r.photos.length, (x.after || []).length]));
-    else L.push([...base, "ทั้งรายการ", r.detail, r.status, r.closedAt ? fmtT(r.closedAt) : "", r.note, r.photos.length, (r.after || []).length]); });
-  put("รายการปัญหา", L, [18, 12, 24, 14, 16, 16, 10, 48, 16, 20, 30, 10, 10]); saveWb(wb, fname("xlsx"));
+  const L = [["ลำดับ","วันที่ตรวจ","Zone","พื้นที่ตรวจ","ผลตรวจ","ประเภทปัญหา","รายละเอียดที่พบ","รูปประกอบจากต้นฉบับ","การแก้ไขณจุดตรวจ","มาตรการแก้ไขและติดตาม","ผู้รับผิดชอบ","กำหนดเสร็จ","สถานะติดตาม","ผู้ตรวจ","หน้าPDF","เลขที่ใบงาน","หมวดหมู่","ข้อย่อย","ปิดประเด็นเมื่อ","รูป Before","รูป After"]];
+  D.list.forEach(r => { const a = [r.order, r.date, r.zone, r.area, "พบสิ่งผิดปกติ", r.type];
+    if (r.subs.length) r.subs.forEach((x, i) => L.push([...a, x.text, r.orig, r.onsite, [r.note, x.note].filter(Boolean).join(" | "), r.worker, r.due, x.status, r.inspector, r.pdf, r.ticket, r.category, `ข้อ ${i + 1}`, x.closedAt ? fmtT(x.closedAt) : "", i ? "" : r.photos.length, (x.after || []).length]));
+    else L.push([...a, r.detail, r.orig, r.onsite, r.note, r.worker, r.due, r.status, r.inspector, r.pdf, r.ticket, r.category, "", r.closedAt ? fmtT(r.closedAt) : "", r.photos.length, (r.after || []).length]); });
+  put("รายการปัญหา", L, [8, 12, 10, 16, 16, 16, 40, 24, 28, 34, 16, 12, 16, 14, 10, 18, 16, 10, 20, 9, 9]); saveWb(wb, fname("xlsx"));
 }
 async function exportPdf(o) {
   if (!window.html2canvas || !window.jspdf) throw new Error("โหลดไลบรารี PDF ไม่สำเร็จ (ตรวจสอบอินเทอร์เน็ต)");
@@ -653,7 +722,7 @@ async function exportPdf(o) {
     addCol(`<div style="margin:2px 0 4px"><h2>รายการปัญหา (${D.list.length} รายการ)</h2></div>`);
     D.list.forEach(r => { const st = effStatus(r), ca = closedAtOf(r);
       const body = r.subs.length ? r.subs.map((x, i) => `<div class="ln">${x.status === CLOSED ? "✓" : "•"} ข้อ ${i + 1}: ${E(x.text)} <b style="color:${RC[x.status]}">[${x.status}${x.closedAt ? " · ปิด " + fmtT(x.closedAt) : ""}]</b>${x.note ? ` <i>— ${E(x.note)}</i>` : ""}${pl("หลัง", x.after)}</div>`).join("") : `<div class="ln">${E(r.detail)}</div>`;
-      addCol(`<div class="it"><div class="ih"><span><b>${E(r.ticket)}</b> · ${fmtD(r.date)}</span><b style="color:${RC[st]}">${st}${ca ? " · ปิด " + fmtT(ca) : ""}</b></div><div class="im">${E(ptKey(r))} · ผู้ตรวจ ${E(r.inspector)} · ${E(r.category || "-")} · ผู้ปฏิบัติงาน ${E(r.worker || "ไม่ระบุ")}</div>${body}${r.note ? `<div class="ln"><i>บันทึก: ${E(r.note)}</i></div>` : ""}${pl("ก่อน", r.photos)}${pl("หลัง", r.after)}</div>`); });
+      addCol(`<div class="it"><div class="ih"><span><b>${E(r.ticket)}</b> · ${fmtD(r.date)}</span><b style="color:${RC[st]}">${st}${ca ? " · ปิด " + fmtT(ca) : ""}</b></div><div class="im">${E(ptKey(r))} · ผู้ตรวจ ${E(r.inspector)} · ${E(r.category || "-")} · ผู้รับผิดชอบ ${E(r.worker || "ไม่ระบุ")}</div>${body}${r.note ? `<div class="ln"><i>บันทึก: ${E(r.note)}</i></div>` : ""}${pl("ก่อน", r.photos)}${pl("หลัง", r.after)}</div>`); });
     if (!D.list.length) addCol(`<div class="im">ไม่มีรายการในช่วงที่เลือก</div>`);
     pages.forEach(({p}, i) => { const f = dv("position:absolute;left:22px;right:22px;bottom:6px;display:flex;justify-content:space-between;font-size:9px;color:#64748b"); f.innerHTML = `<span>บริษัท ไอ-เทล คอร์ปอเรชั่น จำกัด (มหาชน)</span><span>หน้า ${i + 1}/${pages.length}</span>`; p.appendChild(f); });
     await Promise.all([...host.querySelectorAll("img")].map(i => i.complete ? 0 : new Promise(r => { i.onload = i.onerror = r; })));
@@ -735,6 +804,7 @@ function festivalOf(dt) {
   $("#themeSel").onchange = e => { try { localStorage.setItem("itl_theme", e.target.value); } catch {} apply(); };
   apply();
 })();
+startSync();
 render();
 </script>
 </body>
