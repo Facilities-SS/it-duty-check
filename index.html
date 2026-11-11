@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ติดตามผลตรวจเวรวันหยุด</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Crect%20width=%2764%27%20height=%2764%27%20rx=%2714%27%20fill=%27%23e4e8ff%27/%3E%3Cpath%20d=%27M8%2030L10%2011L22%2022Z%27%20fill=%27%23fdba74%27/%3E%3Cpath%20d=%27M20%2022L32%2011L34%2030Z%27%20fill=%27%23fdba74%27/%3E%3Ccircle%20cx=%2721%27%20cy=%2738%27%20r=%2714%27%20fill=%27%23fdba74%27/%3E%3Ccircle%20cx=%2716%27%20cy=%2736%27%20r=%272%27%20fill=%27%233b2f4a%27/%3E%3Ccircle%20cx=%2726%27%20cy=%2736%27%20r=%272%27%20fill=%27%233b2f4a%27/%3E%3Cpath%20d=%27M19.5%2041h3L21%2043Z%27%20fill=%27%23fb7185%27/%3E%3Cellipse%20cx=%2733%27%20cy=%2733%27%20rx=%275%27%20ry=%2711%27%20fill=%27%237c4a22%27%20transform=%27rotate(10%2033%2033)%27/%3E%3Cellipse%20cx=%2757%27%20cy=%2733%27%20rx=%275%27%20ry=%2711%27%20fill=%27%237c4a22%27%20transform=%27rotate(-10%2057%2033)%27/%3E%3Ccircle%20cx=%2745%27%20cy=%2740%27%20r=%2713%27%20fill=%27%23c08457%27/%3E%3Cellipse%20cx=%2747%27%20cy=%2746%27%20rx=%277%27%20ry=%275%27%20fill=%27%23f5e1c8%27/%3E%3Ccircle%20cx=%2740%27%20cy=%2737%27%20r=%272%27%20fill=%27%233b2f4a%27/%3E%3Ccircle%20cx=%2750%27%20cy=%2737%27%20r=%272%27%20fill=%27%233b2f4a%27/%3E%3Cellipse%20cx=%2747%27%20cy=%2744%27%20rx=%272.6%27%20ry=%272%27%20fill=%27%233b2f4a%27/%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -195,6 +196,14 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 .dz-hint{border:1.5px dashed color-mix(in srgb,var(--tc) 40%,var(--line));border-radius:14px;padding:.8rem;text-align:center;font-size:.78rem;color:var(--muted);background:color-mix(in srgb,var(--card) 70%,transparent)}
 .fld{display:flex;flex-direction:column;gap:.35rem;font-size:.76rem;font-weight:600;color:var(--muted)}.fld .inp{font-weight:400;color:var(--ink)}
 .sec .sec{background:color-mix(in srgb,var(--tc) 6%,var(--card))}
+/* ---- รูปภาพ: ภาพย่อพอดี ลบได้ คลิกดูรูปใหญ่ ---- */
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,96px);gap:.6rem}
+.thumb{position:relative;width:96px;height:96px}
+.thumb .photo{display:block;width:100%;height:100%;aspect-ratio:auto;border-radius:14px;cursor:zoom-in;box-shadow:0 1px 3px rgba(30,41,59,.12);border:2px solid var(--card)}
+.thumb .photo img{transition:transform .2s}.thumb:hover .photo img{transform:scale(1.06)}
+.thumb-x{position:absolute;top:-6px;right:-6px;width:1.6rem;height:1.6rem;border-radius:999px;background:var(--ink);color:var(--card);font-size:.7rem;line-height:1;border:2px solid var(--card);display:grid;place-items:center;opacity:.92}
+.thumb-x:hover{background:var(--bad);transform:scale(1.1)}
+#camV{transform:none}
 </style>
 </head>
 <body>
@@ -237,6 +246,9 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
   <label class="flex gap-2 items-center"><input type="checkbox" id="ePh" checked> แนบรูปภาพ (Before / After) ในรายงาน PDF</label>
   <label class="flex gap-2 items-center"><input type="checkbox" id="eCols" checked> จัดรายการเป็น 2 คอลัมน์ (กระชับ ประหยัดหน้า)</label></div>
   <div class="flex justify-end gap-2 mt-3"><button class="btn2" id="eCancel">ปิด</button><button class="btn" id="eGo">ส่งออก</button></div></dialog>
+<dialog id="camD" class="card p-4 w-[min(34rem,94vw)]" style="color:var(--ink)"><h2 class="font-semibold mb-2">📷 ถ่ายรูป</h2>
+  <video id="camV" autoplay playsinline muted style="width:100%;border-radius:14px;background:#0f172a;max-height:60vh"></video><p id="camMsg" class="text-xs mt-2" style="color:var(--muted)"></p>
+  <div class="flex flex-wrap justify-between gap-2 mt-3"><button class="btn2" id="camSw">🔄 สลับกล้อง</button><div class="flex gap-2"><button class="btn2" id="camX">ปิด</button><button class="btn" id="camSnap">📸 ถ่ายรูป</button></div></div></dialog>
 <dialog id="askD" class="card p-4 w-[min(24rem,92vw)]" style="color:var(--ink)"><p id="askT" class="mb-3"></p><div class="flex justify-end gap-2"><button class="btn2" id="askN">ยกเลิก</button><button class="btn" id="askY">ตกลง</button></div></dialog>
 <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-md text-sm hidden z-50 max-w-[92vw]" style="background:var(--ink);color:var(--paper)"></div>
 
@@ -325,17 +337,17 @@ function persistLocal() { try { localStorage.setItem(KEY.rec, JSON.stringify(rec
 const base = new Map(), dirtyIds = new Set(); let lastSettings = "", settingsReady = false, pendingRender = false;
 const normStatus = v => { v = String(v ?? ""); return /ปิด/.test(v) ? CLOSED : /กำลัง/.test(v) ? PROG : WAIT; };
 const dstr = v => v && v.toDate ? v.toDate().toLocaleDateString("sv") : String(v || "");
-const cleanSub = (s, lite) => ({id:s.id, text:s.text || "", note:s.note || "", status:s.status, closedAt:s.closedAt || null, after:lite ? (s.after || []).map(u => u.length) : (s.after || [])});
+const cleanSub = (s, lite) => ({id:s.id, text:s.text || "", note:s.note || "", status:s.status, closedAt:s.closedAt || null, after:lite ? (s.after || []).map(u => u.length) : [...(s.after || [])]});
 /* โครงสร้างเอกสารใน Firestore (Collection duty_tickets) */
 const toDoc = (r, lite) => ({"ลำดับ":r.order || 0, "วันที่ตรวจ":r.date || "", "Zone":r.zone || "", "พื้นที่ตรวจ":r.area || "", "ผลตรวจ":r.result === "ab" ? "พบสิ่งผิดปกติ" : "ปกติ",
   "ประเภทปัญหา":r.type || "", "รายละเอียดที่พบ":r.detail || "", "รูปประกอบจากต้นฉบับ":r.orig || "", "การแก้ไขณจุดตรวจ":r.onsite || "", "มาตรการแก้ไขและติดตาม":r.note || "",
   "ผู้รับผิดชอบ":r.worker || "", "กำหนดเสร็จ":r.due || "", "สถานะติดตาม":effStatus(r), "ผู้ตรวจ":r.inspector || "", "หน้าPDF":r.pdf || "",
   ticket:r.ticket || "", category:r.category || "", closedAt:r.closedAt || null, stamp:r.stamp || "", createdAt:r.createdAt || 0,
-  subs:(r.subs || []).filter(s => !s.isNew).map(s => cleanSub(s, lite)), photos:lite ? (r.photos || []).map(u => u.length) : (r.photos || []), after:lite ? (r.after || []).map(u => u.length) : (r.after || [])});
+  subs:(r.subs || []).filter(s => !s.isNew).map(s => cleanSub(s, lite)), "รูปหลักฐาน":lite ? (r.photos || []).map(u => u.length) : [...(r.photos || [])], "รูปหลังแก้ไข":lite ? (r.after || []).map(u => u.length) : [...(r.after || [])]});
 const fromDoc = (id, d) => ({id, order:d["ลำดับ"] || 0, date:dstr(d["วันที่ตรวจ"]), zone:d.Zone || "", area:d["พื้นที่ตรวจ"] || "", result:resultOf(d["ผลตรวจ"]) || "ok", type:d["ประเภทปัญหา"] || "", detail:d["รายละเอียดที่พบ"] || "",
   orig:d["รูปประกอบจากต้นฉบับ"] || "", onsite:d["การแก้ไขณจุดตรวจ"] || "", note:d["มาตรการแก้ไขและติดตาม"] || "", worker:d["ผู้รับผิดชอบ"] || "", due:dstr(d["กำหนดเสร็จ"]), status:normStatus(d["สถานะติดตาม"]),
   inspector:d["ผู้ตรวจ"] || "", pdf:d["หน้าPDF"] || "", ticket:d.ticket || "", category:d.category || "", closedAt:d.closedAt || null, stamp:d.stamp || "", createdAt:d.createdAt || 0,
-  subs:(d.subs || []).map(s => ({note:"", after:[], ...s})), photos:d.photos || [], after:d.after || []});
+  subs:(d.subs || []).map(s => ({note:"", ...s, after:[...(s.after || [])]})), photos:[...(d["รูปหลักฐาน"] ?? d.photos ?? [])], after:[...(d["รูปหลังแก้ไข"] ?? d.after ?? [])]});
 const sigOf = r => JSON.stringify(toDoc(r, true));
 function setSync(st, n) { const el = document.getElementById("syncBadge"); if (!el) return;
   el.textContent = {load:"⏳ กำลังเชื่อมต่อ Firebase…", ok:`🟢 ซิงค์ Real-time · ${n ?? recs.length} รายการ`, cache:"🟡 ออฟไลน์ — ใช้ข้อมูลในเครื่อง", err:"🔴 เชื่อมต่อ Firebase ไม่ได้", local:"💾 โหมดเครื่องนี้ (ไม่มี Firebase)"}[st] || ""; }
@@ -411,11 +423,11 @@ function resultOf(v) {   // "ab" = พบสิ่งผิดปกติ, "ok"
   return /ผิดปกติ|พบ|ng|fail|ไม่ผ่าน/.test(s) ? "ab" : null;
 }
 const imgUrl = u => { const m = u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=)([\w-]+)/); return m ? `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1000` : u; };
-function shrinkBlob(blob) {
+function shrinkBlob(blob, maxDim = 560, q = .6) {
   return new Promise(res => { const u = URL.createObjectURL(blob), i = new Image();
-    i.onload = () => { const k = Math.min(1, 560 / Math.max(i.width, i.height)), c = document.createElement("canvas");
+    i.onload = () => { const k = Math.min(1, maxDim / Math.max(i.width, i.height)), c = document.createElement("canvas");
       c.width = Math.round(i.width * k); c.height = Math.round(i.height * k); c.getContext("2d").drawImage(i, 0, 0, c.width, c.height);
-      URL.revokeObjectURL(u); res(c.toDataURL("image/jpeg", .6)); };
+      URL.revokeObjectURL(u); res(c.toDataURL("image/jpeg", q)); };
     i.onerror = () => res(null); i.src = u; });
 }
 async function extractImages(buf, sheetNo) {
@@ -557,14 +569,14 @@ function vDay() {
     <div class="space-y-4">${html || `<p class="card p-4" style="color:var(--muted)">${recs.length ? "ไม่พบรายการตามตัวกรอง" : !synced ? "⏳ กำลังโหลดข้อมูลจาก Firebase…" : "🐶🐱 ยังไม่มีข้อมูล — อัปโหลดไฟล์ตรวจเวรด้านบน ทุกเครื่องจะเห็นข้อมูลตรงกันทันที"}</p>`}</div>`;
 }
 const RB = "background:rgba(0,0,0,.65);color:#fff;border-radius:999px;width:1.6rem;height:1.6rem";
-const zone = (dz, arr, title, color, cam) => { const tone = /done/.test(color) ? "mint" : "lav", ico = tone === "mint" ? "✅" : "📷";
+const zone = (dz, arr, title, color) => { const tone = /done/.test(color) ? "mint" : "lav", ico = tone === "mint" ? "✅" : "📷";
   return `<div data-drop="${dz}" tabindex="0" class="zone sec sec-${tone}" aria-label="${title}">
   <div class="flex flex-wrap items-center justify-between gap-2"><div class="sec-t"><i>${ico}</i>${title} <small>${arr.length} รูป</small></div>
-    <div class="flex flex-wrap gap-1"><label class="btn2 text-xs cursor-pointer" style="min-height:2rem;padding:.2rem .7rem">+ รูป<input type="file" accept="image/*" multiple class="sr-only" data-addfile="${dz}"></label>
-      ${cam ? `<label class="btn2 text-xs cursor-pointer" style="min-height:2rem;padding:.2rem .7rem">📷<input type="file" accept="image/*" capture="environment" class="sr-only" data-addfile="${dz}" aria-label="ถ่ายรูป"></label>` : ""}</div></div>
-  ${arr.length ? `<div class="grid grid-cols-4 sm:grid-cols-5 gap-2">${arr.map((u, i) => `<div class="relative"><button class="photo w-full" data-act="ph" data-dz="${dz}" data-i="${i}" aria-label="ดูรูปที่ ${i + 1}"><img src="${esc(u)}" alt="${title} ${i + 1}" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'โหลดรูปไม่ได้',className:'text-xs p-1 block'}))"></button><button class="absolute top-1 right-1 text-xs" style="${RB}" data-act="delph" data-dz="${dz}" data-i="${i}" aria-label="ลบรูป">✕</button></div>`).join("")}</div>`
-   : `<div class="dz-hint">ลากรูปมาวาง หรือคลิกกรอบนี้แล้วกด Ctrl+V</div>`}
-  <details class="text-xs"><summary class="cursor-pointer" style="color:var(--muted)">เพิ่มจากลิงก์รูป</summary><div class="flex gap-1 mt-2"><input class="inp" data-url="1" placeholder="https://…"><button class="btn2" data-act="addurl" data-dz="${dz}">เพิ่ม</button></div></details></div>`; };
+    <div class="flex flex-wrap gap-1"><label class="btn2 text-xs cursor-pointer" style="min-height:2rem;padding:.2rem .7rem">📁 เลือกรูป<input type="file" accept="image/*" multiple class="sr-only" data-addfile="${dz}"></label>
+      <button class="btn2 text-xs" style="min-height:2rem;padding:.2rem .7rem" data-act="cam" data-dz="${dz}">📷 ถ่ายรูป</button><input type="file" accept="image/*" capture="environment" class="sr-only" data-addfile="${dz}" aria-label="ถ่ายรูปด้วยกล้อง"></div></div>
+  ${arr.length ? `<div class="thumbs">${arr.map((u, i) => `<div class="thumb"><button class="photo" data-act="ph" data-dz="${dz}" data-i="${i}" aria-label="ดูรูปที่ ${i + 1}" title="คลิกเพื่อดูรูปใหญ่"><img src="${esc(u)}" alt="${title} ${i + 1}" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'โหลดรูปไม่ได้',className:'text-xs p-1 block'}))"></button><button class="thumb-x" data-act="delph" data-dz="${dz}" data-i="${i}" aria-label="ลบรูปที่ ${i + 1}" title="ลบรูปนี้">✕</button></div>`).join("")}</div>`
+   : `<div class="dz-hint">ลากรูปมาวาง · กด Ctrl+V วางรูปที่คัดลอก · หรือใช้ปุ่มด้านบน</div>`}
+  <div class="flex gap-2 items-center"><input class="inp" data-url="1" placeholder="🔗 วางลิงก์รูป https://… แล้วกด Enter" aria-label="ลิงก์รูปภาพ"><button class="btn2" data-act="addurl" data-dz="${dz}">เพิ่มลิงก์</button></div></div>`; };
 function closedRow(x) {   // การ์ดที่ปิดประเด็นแล้ว: ย่อเป็นแถวสรุป คลิกเพื่อขยาย
   const subs = x.subs, sum = subs.length ? `ข้อย่อย ${subs.filter(s => s.status === CLOSED).length}/${subs.length} · ${subs.map(s => s.text).join(" / ")}` : (x.detail || "-"), ca = closedAtOf(x);
   return `<article class="card closed-row ${flashId === x.id ? "flash" : ""}" data-id="${x.id}"><button class="w-full text-left flex flex-wrap items-center gap-x-3 gap-y-1" data-act="cardtoggle" data-id="${x.id}" aria-expanded="false" aria-label="ขยายรายละเอียด ${esc(x.ticket)}">
@@ -684,8 +696,8 @@ V.addEventListener("click", async e => {
     if (!x.text) return toast("กรุณาใส่ข้อความของข้อย่อยก่อนบันทึก"); delete x.isNew; editSubs.delete(x.id); drafts.delete(x.id); toast("บันทึกข้อย่อยแล้ว"); }
   else if (a === "subcancel") { const x = r.subs.find(y => y.id === b.dataset.sid); if (x.isNew) r.subs = r.subs.filter(y => y !== x); editSubs.delete(x.id); drafts.delete(x.id); }
   else if (a === "delph") { if (!await ask("ลบรูปนี้ออกจากรายการ?")) return; arrOf(b.dataset.dz).splice(+b.dataset.i, 1); }
-  else if (a === "addurl") { const inp = b.closest("[data-drop]").querySelector("[data-url]"), urls = inp.value.split(/[\s,;]+/).filter(u => /^https?:\/\//i.test(u)).map(imgUrl);
-    if (!urls.length) return toast("ลิงก์ไม่ถูกต้อง — ต้องขึ้นต้นด้วย https://"); arrOf(b.dataset.dz).push(...urls); toast(`เพิ่มลิงก์รูป ${urls.length} รูปแล้ว`); }
+  else if (a === "addurl") { addUrls(b.dataset.dz, b.closest("[data-drop]").querySelector("[data-url]").value); return; }
+  else if (a === "cam") { camDz = b.dataset.dz; if (matchMedia("(pointer:coarse)").matches || !navigator.mediaDevices?.getUserMedia) { b.parentElement.querySelector("input[capture]")?.click(); return; } $("#camD").showModal(); camStart(); return; }
   else if (a === "delsub") { if (!await ask("ลบข้อย่อยนี้?")) return; r.subs = r.subs.filter(s => s.id !== b.dataset.sid); }
   else if (a === "del") { if (!await ask(`ลบ ${r.ticket} ?`)) return; recs = recs.filter(x => x !== r); }
   else if (a === "addcat") { const n = $("#newCat").value.trim(); if (!n) return; if (cats.some(c => c.name === n)) return toast("มีหมวดหมู่นี้แล้ว"); cats.splice(cats.length - 1, 0, {name:n, kw:n}); }
@@ -706,14 +718,28 @@ V.addEventListener("change", e => {
   else if (f === "wkname") { const i = +t.dataset.i, o = workers[i]; if (!v || workers.some((w, j) => j !== i && w === v)) { toast("ชื่อว่างหรือซ้ำ"); return render(); } recs.forEach(x => { if (x.worker === o) x.worker = v; }); workers[i] = v; }
   save(); if (f === "catname" || f === "wkname" || f === "due") render();
 });
-const addPhotos = async (dz, files) => { const arr = arrOf(dz), imgs = [...files].filter(f => f.type.startsWith("image/"));
-  if (!arr) return; if (!imgs.length) return toast("ไม่พบไฟล์รูปภาพ"); toast("กำลังเพิ่มรูป…");
-  for (const f of imgs) { const u = await shrinkBlob(f); if (u) arr.push(u); } if (save()) toast(`เพิ่มรูป ${imgs.length} รูปแล้ว`); render(); };
-V.addEventListener("paste", e => { const fs = [...(e.clipboardData?.files || [])].filter(f => f.type.startsWith("image/")); if (!fs.length) return;
-  const z = e.target.closest?.("[data-drop]"), art = e.target.closest?.("article"), dz = z ? z.dataset.drop : art && `${art.dataset.id}||photos`; if (!dz) return; e.preventDefault(); addPhotos(dz, fs); });
+const MAX_DOC = 950000, docSize = r => JSON.stringify(toDoc(r)).length;   // เอกสาร Firestore จำกัด 1MB
+const addPhotos = async (dz, files) => { const arr = arrOf(dz), rec = recs.find(x => x.id === dz.split("|")[0]), imgs = [...files].filter(f => f && f.type.startsWith("image/"));
+  if (!arr || !rec) return; if (!imgs.length) return toast("ไม่พบไฟล์รูปภาพ"); toast("กำลังเพิ่มรูป…"); let added = 0, over = 0;
+  for (const f of imgs) { let u = await shrinkBlob(f, 560, .6); if (!u) continue; arr.push(u);
+    if (docSize(rec) > MAX_DOC) { arr.pop(); u = await shrinkBlob(f, 380, .5); if (u) arr.push(u); if (!u || docSize(rec) > MAX_DOC) { if (u) arr.pop(); over++; continue; } } added++; }
+  if (added) save(); toast(over ? `เพิ่มได้ ${added} รูป — ${over} รูปเกินขนาดที่ Firestore เก็บได้ต่อรายการ (1MB) ลองใช้ลิงก์รูปแทน` : `เพิ่มรูป ${added} รูปแล้ว`); render(); };
+const addUrls = (dz, text) => { const arr = arrOf(dz); if (!arr) return 0;
+  const urls = String(text || "").split(/[\s,;]+/).filter(u => /^https?:\/\/\S+/i.test(u)).map(imgUrl).filter((u, i, a2) => !arr.includes(u) && a2.indexOf(u) === i);
+  if (!urls.length) { toast("ลิงก์ไม่ถูกต้อง หรือมีรูปนี้อยู่แล้ว — ต้องขึ้นต้นด้วย https://"); return 0; }
+  arr.push(...urls); save(); render(); toast(`เพิ่มลิงก์รูป ${urls.length} รูปแล้ว`); return urls.length; };
+V.addEventListener("paste", e => { const cd = e.clipboardData; if (!cd) return;
+  const fs = [...(cd.files || [])].filter(f => f.type.startsWith("image/"));
+  [...(cd.items || [])].forEach(it => { if (it.kind === "file" && it.type.startsWith("image/")) { const f = it.getAsFile(); if (f && !fs.some(x => x.size === f.size && x.type === f.type)) fs.push(f); } });
+  const z = e.target.closest?.("[data-drop]"), art = e.target.closest?.("article"), dz = z ? z.dataset.drop : art && `${art.dataset.id}||photos`; if (!dz) return;
+  if (fs.length) { e.preventDefault(); addPhotos(dz, fs); return; }
+  const tx = (cd.getData("text/plain") || "").trim(); if (z && !/^(INPUT|TEXTAREA)$/.test(e.target.tagName) && /^https?:\/\/\S+$/i.test(tx)) { e.preventDefault(); addUrls(dz, tx); } });
+V.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.dataset?.url) { e.preventDefault(); addUrls(e.target.closest("[data-drop]").dataset.drop, e.target.value); } });
 ["dragenter","dragover"].forEach(ev => V.addEventListener(ev, e => { const z = e.target.closest?.("[data-drop]"); if (z) z.classList.add("dz-over"); }));
 V.addEventListener("dragleave", e => { const z = e.target.closest?.("[data-drop]"); if (z && !z.contains(e.relatedTarget)) z.classList.remove("dz-over"); });
-V.addEventListener("drop", e => { const z = e.target.closest?.("[data-drop]"); if (z) { z.classList.remove("dz-over"); addPhotos(z.dataset.drop, e.dataTransfer.files); } });
+V.addEventListener("drop", e => { const z = e.target.closest?.("[data-drop]"); if (!z) return; z.classList.remove("dz-over"); const dt = e.dataTransfer, fs = [...(dt.files || [])].filter(f => f.type.startsWith("image/"));
+  if (fs.length) return addPhotos(z.dataset.drop, fs); const u = (dt.getData("text/uri-list") || dt.getData("text/plain") || "").trim().split("\n")[0];
+  if (/^https?:\/\//i.test(u)) addUrls(z.dataset.drop, u); else toast("ไม่พบไฟล์รูปภาพที่ลากมา"); });
 V.addEventListener("input", e => {
   const t = e.target, f = t.dataset.f; if (!["detail","onsite","note","subtext","subnote"].includes(f)) return;
   if (f === "subtext" || f === "subnote") { const d = drafts.get(t.dataset.sid); if (d) d[f === "subtext" ? "text" : "note"] = t.value; return; }   // ข้อย่อย: เป็นฉบับร่าง จนกว่าจะกด “บันทึก”
@@ -722,6 +748,17 @@ V.addEventListener("input", e => { if (e.target.id === "q") { q = e.target.value
   if (e.target.id === "ptq") { ptq = e.target.value; clearTimeout(V._t); V._t = setTimeout(() => { render(); const el = $("#ptq"); el.focus(); el.setSelectionRange(ptq.length, ptq.length); }, 300); } });
 $("#clr").onclick = async () => { if (recs.length && await ask((fdb ? "ล้างข้อมูลตรวจเวรทั้งหมด? ข้อมูลบน Firebase จะถูกลบและหายจากทุกเครื่อง (หมวดหมู่และรายชื่อผู้รับผิดชอบคงไว้) — ควรส่งออก Excel ก่อน" : "ล้างข้อมูลตรวจเวรทั้งหมดในเครื่องนี้? (หมวดหมู่และรายชื่อผู้รับผิดชอบจะคงไว้ — ควรส่งออก Excel ก่อน)"))) { recs = []; save(); render(); } };
 
+/* ===== กล้องบนคอมพิวเตอร์ (มือถือใช้กล้องของเครื่องโดยตรง) ===== */
+let camStream = null, camDz = "", camFacing = "environment";
+const camStop = () => { camStream?.getTracks().forEach(t => t.stop()); camStream = null; };
+async function camStart() { camStop(); const m = $("#camMsg");
+  try { camStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:camFacing}}, audio:false}); $("#camV").srcObject = camStream; m.textContent = "กด “ถ่ายรูป” ได้หลายภาพ แล้วกด “ปิด” เมื่อเสร็จ"; }
+  catch (e) { m.textContent = "เปิดกล้องไม่ได้: " + (e.name === "NotAllowedError" ? "ยังไม่ได้อนุญาตให้เว็บใช้กล้อง" : e.name === "NotFoundError" ? "ไม่พบกล้องในอุปกรณ์นี้" : e.message); } }
+$("#camX").onclick = () => $("#camD").close(); $("#camD").addEventListener("close", camStop);
+$("#camSw").onclick = () => { camFacing = camFacing === "environment" ? "user" : "environment"; camStart(); };
+$("#camSnap").onclick = async () => { const v = $("#camV"); if (!v.videoWidth) return toast("กล้องยังไม่พร้อม");
+  const c = document.createElement("canvas"), k = Math.min(1, 960 / v.videoWidth); c.width = Math.round(v.videoWidth * k); c.height = Math.round(v.videoHeight * k); c.getContext("2d").drawImage(v, 0, 0, c.width, c.height);
+  const blob = await new Promise(r => c.toBlob(r, "image/jpeg", .85)); await addPhotos(camDz, [new File([blob], "camera.jpg", {type:"image/jpeg"})]); };
 /* ===== Lightbox ===== */
 let lb = {list:[], i:0};
 const showLb = () => { $("#lbI").src = lb.list[lb.i]; $("#lbN").textContent = `${lb.i + 1} / ${lb.list.length}`; };
