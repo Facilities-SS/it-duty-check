@@ -1,0 +1,32 @@
+{
+  "name": "ติดตามผลตรวจเวรวันหยุด",
+  "short_name": "ตรวจเวร",
+  "description": "ระบบติดตามผลตรวจเวรวันหยุด บริษัท ไอ-เทล คอร์ปอเรชั่น จำกัด (มหาชน)",
+  "lang": "th",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5f7fb",
+  "theme_color": "#4f63d2",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
