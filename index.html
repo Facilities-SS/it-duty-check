@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ติดตามผลตรวจเวรวันหยุด</title>
 <meta name="theme-color" content="#4f63d2">
-<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -227,6 +227,24 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 .dtab{width:100%;border-collapse:separate;border-spacing:0;font-size:.82rem;min-width:44rem}
 .dtab th{position:sticky;top:0;background:color-mix(in srgb,var(--brand) 8%,var(--card));text-align:left;padding:.5rem .6rem;font-weight:700;border-bottom:1px solid var(--line)}
 .dtab td{padding:.5rem .6rem;border-bottom:1px solid var(--line);vertical-align:middle}.dtab tr:hover td{background:color-mix(in srgb,var(--brand) 5%,var(--card))}
+/* ---- Export / ตารางกรอง / ปุ่มลอย ---- */
+.cap-only{display:none}
+.capturing{background:#fff!important;padding:18px;color:#1e293b;--ink:#1e293b;--paper:#f5f7fb;--card:#fff;--line:#e3e8f0;--muted:#64748b;--brand:#4f63d2;--wait:#b7791f;--prog:#2b7bb9;--done:#2f855a;--bad:#c2415b}
+.capturing .cap-only{display:block}.capturing .no-cap{display:none!important}.capturing .cols{overflow:visible}
+.capturing .kpi{background:var(--kbg)!important;border-color:var(--kbd)!important}.capturing .kpi>i{background:var(--kic)!important}.capturing .kpi b{color:var(--ktx)!important}
+.capturing .hb-t{background:#e8edf5!important}.capturing .card{box-shadow:none!important;background:#fff!important}
+.dhead{padding:0 0 .8rem;margin-bottom:.9rem;border-bottom:3px solid #4f63d2}.dh1{font-size:1.4rem;font-weight:700;color:#27304f}
+.menu{position:absolute;right:0;top:calc(100% + 6px);z-index:40;min-width:15.5rem;display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 30px rgba(30,41,59,.18);padding:.4rem}
+.menu[hidden]{display:none}.menu button{text-align:left;padding:.6rem .8rem;border-radius:10px;font-size:.88rem;min-height:2.5rem}.menu button:hover{background:color-mix(in srgb,var(--brand) 10%,var(--card))}
+.chipbtn{padding:.4rem .9rem;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:.82rem;transition:background-color .15s,transform .12s}.chipbtn b{margin-left:.3rem;color:var(--muted)}
+.chipbtn:hover{background:color-mix(in srgb,var(--brand) 8%,var(--card))}.chipbtn:active{transform:scale(.96)}.chipbtn[aria-pressed=true]{background:var(--brand);border-color:var(--brand);color:#fff}.chipbtn[aria-pressed=true] b{color:#fff}
+.thb{font-weight:700;display:inline-flex;gap:.25rem;align-items:center}.thb:hover{color:var(--brand)}
+.fab-wrap{position:fixed;right:max(.9rem,env(safe-area-inset-right));bottom:max(.9rem,env(safe-area-inset-bottom));z-index:45;display:flex;flex-direction:column;align-items:flex-end;gap:.5rem}
+.fab{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:.6rem 1rem;font-size:.85rem;font-weight:600;box-shadow:0 6px 18px rgba(30,41,59,.2);min-height:2.75rem;transition:transform .12s,background-color .15s}
+.fab:hover{background:color-mix(in srgb,var(--brand) 10%,var(--card))}.fab:active{transform:scale(.95)}.fab[hidden]{display:none}
+.fab-wrap .menu{top:auto;bottom:calc(100% + 8px);max-height:50vh;overflow:auto;position:absolute}
+#topBtn{background:var(--brand);color:#fff;border-color:var(--brand)}
+@media print{.fab-wrap{display:none}}
 </style>
 </head>
 <body>
@@ -235,7 +253,7 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
   <p class="text-xs opacity-90">บริษัท ไอ-เทล คอร์ปอเรชั่น จำกัด (มหาชน) · ซิงค์ผ่าน Firebase Cloud <span id="syncBadge" class="ml-1 px-2 rounded-full" style="background:rgba(255,255,255,.6)">⏳ กำลังเชื่อมต่อ…</span></p></div>
 </header>
 <nav class="border-b" style="border-color:var(--line)"><div class="max-w-6xl mx-auto flex overflow-x-auto" role="tablist">
-  <button class="tab" data-v="day" role="tab">รายวัน</button><button class="tab" data-v="stat" role="tab">สถิติ</button><button class="tab" data-v="manage" role="tab">หมวดหมู่ / ผู้รับผิดชอบ</button>
+  <button class="tab" data-v="day" role="tab">ผลตรวจ</button><button class="tab" data-v="stat" role="tab">สถิติ</button><button class="tab" data-v="manage" role="tab">หมวดหมู่ / ผู้รับผิดชอบ</button>
 </div></nav>
 <main class="max-w-6xl mx-auto p-3 sm:p-4 space-y-3">
   <section id="stage" class="stage" aria-label="ฉากตกแต่ง"></section>
@@ -269,6 +287,7 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
   <label class="flex gap-2 items-center"><input type="checkbox" id="ePh" checked> แนบรูปภาพ (Before / After) ในรายงาน PDF</label>
   <label class="flex gap-2 items-center"><input type="checkbox" id="eCols" checked> จัดรายการเป็น 2 คอลัมน์ (กระชับ ประหยัดหน้า)</label></div>
   <div class="flex justify-end gap-2 mt-3"><button class="btn2" id="eCancel">ปิด</button><button class="btn" id="eGo">ส่งออก</button></div></dialog>
+<div class="fab-wrap" id="fab"><div id="jumpMenu" class="menu" role="menu" hidden></div><button class="fab" id="jumpBtn" hidden>📅 ไปยังวันที่</button><button class="fab" id="topBtn" hidden aria-label="กลับด้านบน">▲ กลับด้านบน</button></div>
 <dialog id="camD" class="card p-4 w-[min(34rem,94vw)]" style="color:var(--ink)"><h2 class="font-semibold mb-2">📷 ถ่ายรูป</h2>
   <video id="camV" autoplay playsinline muted style="width:100%;border-radius:14px;background:#0f172a;max-height:60vh"></video><p id="camMsg" class="text-xs mt-2" style="color:var(--muted)"></p>
   <div class="flex flex-wrap justify-between gap-2 mt-3"><button class="btn2" id="camSw">🔄 สลับกล้อง</button><div class="flex gap-2"><button class="btn2" id="camX">ปิด</button><button class="btn" id="camSnap">📸 ถ่ายรูป</button></div></div></dialog>
@@ -594,7 +613,7 @@ $("#tpl").onclick = () => {
 };
 
 /* ===== สถานะหน้าจอ ===== */
-let statKey = "", grpBy = "dept", sortAsc = false;
+let statKey = "", grpBy = "dept", sortAsc = false, tStatus = "all", tDate = "", tSort = "date", expMenu = false;
 let view = "day", per = "month", q = "", fst = "", fz = "", fa = "", fc = "", showOk = true, ptq = "";
 const editSubs = new Set();
 const byOpen = (a, b) => (effStatus(a) === CLOSED) - (effStatus(b) === CLOSED) || (a.ticket || "").localeCompare(b.ticket || "");
@@ -609,10 +628,10 @@ const opt = (arr, cur, blank) => (blank !== undefined ? `<option value="">${blan
 
 function render() {
   document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", b.dataset.v === view));
-  const vw = $("#view"); $("#stage").hidden = view !== "day"; vw.classList.toggle("anim", animNext); animNext = false; vw.innerHTML = view === "day" ? vDay() : view === "stat" ? vStat() : vManage(); if (flashId) setTimeout(() => { flashId = null; }, 1200);
+  const vw = $("#view"); $("#stage").hidden = view !== "day"; vw.classList.toggle("anim", animNext); animNext = false; vw.innerHTML = view === "day" ? vDay() : view === "stat" ? vStat() : vManage(); if (flashId) setTimeout(() => { flashId = null; }, 1200); fabUpdate();
 }
 
-/* ----- แท็บรายวัน ----- */
+/* ----- แท็บผลตรวจ ----- */
 function vDay() {
   const byDate = {}; recs.forEach(r => (byDate[r.date] ||= []).push(r));
   const nq = norm(q), filtering = !!(q || fst || fz || fa || fc), zm = r => (!fz || r.zone === fz) && (!fa || r.area === fa);
@@ -631,7 +650,7 @@ function vDay() {
     }
     const hdr = editDate === d ? `<div class="p-4 flex flex-wrap items-center gap-2"><input type="date" id="dateIn" class="inp" style="width:auto" value="${d}" aria-label="วันที่ใหม่"><button class="btn" data-act="datesave" data-d="${d}">บันทึกวันที่</button><button class="btn2" data-act="datecancel">ยกเลิก</button></div>`
       : `<div class="p-4 flex flex-wrap items-center justify-between gap-2"><div class="flex items-center gap-2"><button class="px-1" data-act="day" data-d="${d}" aria-expanded="${isOpen || filtering}" aria-label="ย่อ/ขยาย">${isOpen || filtering ? "▾" : "▸"}</button><button class="text-base font-bold underline decoration-dotted" data-act="dateedit" data-d="${d}" title="คลิกเพื่อแก้ไขวันที่ของกลุ่มนี้">${fmtD(d)} <span class="text-xs">✎</span></button><button class="btn2 btn-del text-xs" style="min-height:2rem;padding:.15rem .6rem" data-act="daydel" data-d="${d}" title="ลบข้อมูลวันที่นี้" aria-label="ลบข้อมูลวันที่นี้">🗑</button></div><button class="text-left" data-act="day" data-d="${d}"><span class="text-sm">ตรวจ ${all.length} จุด · พบปัญหา <b style="color:${abn.length ? "var(--bad)" : "var(--done)"}">${abn.length}</b> (${pct(abn.length, all.length)}%)${open ? ` · <b style="color:var(--wait)">ค้าง ${open}</b>` : abn.length ? ` · <b style="color:var(--done)">ปิดครบ</b>` : ""}</span></button></div>`;
-    return `<section class="card overflow-hidden">${hdr}${body}</section>`;
+    return `<section class="card overflow-hidden" data-dayhdr="${d}">${hdr}${body}</section>`;
   }).join("");
   const nat = (a, b) => String(a).localeCompare(String(b), "th", {numeric:true}), uniq = k => [...new Set(recs.map(r => r[k]).filter(v => v && v !== "-"))].sort(nat), zs = uniq("zone"), as = uniq("area"), cs = [...new Set(recs.map(r => r.category).filter(Boolean))].sort();
   return `<div class="card p-4 grid grid-cols-2 sm:grid-cols-6 gap-3 mb-4">
@@ -676,7 +695,7 @@ function card(x) {
   const chip = (cls, ico, t) => t ? `<span class="chip ${cls}">${ico} ${esc(t)}</span>` : "", zc = x.zone && x.zone !== "-" ? x.zone : "", ac = x.area && x.area !== "-" ? x.area : "";
   return `<article class="card tk ${flashId === x.id ? "flash" : ""}" data-id="${x.id}" style="border-left:5px solid ${SC[st]};${done ? "opacity:.92" : ""}">
     <div class="tk-head"><b class="font-mono text-sm">${x.order ? "#" + x.order + " · " : ""}${done ? "✓ " : ""}${esc(x.ticket)}</b>
-      <span class="flex flex-wrap items-center gap-2">${done ? `<button class="btn2 text-xs" data-act="cardtoggle" data-id="${x.id}" aria-expanded="true">▴ ย่อการ์ด</button>` : ""}${late(x) ? `<span class="pill" style="background:var(--bad)">เกินกำหนด</span>` : ""}${statusPill(st)}</span></div>
+      <span class="flex flex-wrap items-center gap-2"><button class="btn2 text-xs" data-act="gotoday" data-d="${x.date}" title="เลื่อนกลับไปหัวข้อวันที่นี้" aria-label="กลับไปหัวข้อวันที่ ${esc(fmtD(x.date))}">⤴ ${fmtD(x.date)}</button>${done ? `<button class="btn2 text-xs" data-act="cardtoggle" data-id="${x.id}" aria-expanded="true">▴ ย่อการ์ด</button>` : ""}${late(x) ? `<span class="pill" style="background:var(--bad)">เกินกำหนด</span>` : ""}${statusPill(st)}</span></div>
     <div class="tk-body">
       <div><h3 class="font-semibold text-base mb-2">${esc(ac || zc || "ไม่ระบุพื้นที่")}</h3>
         <div class="chips">${ac && zc ? chip("c-blue", "📍", zc) : ""}${chip("c-pink", "⚠️", x.type && x.type !== "-" ? x.type : "")}${chip("c-lav", "👤", "ผู้ตรวจ " + (x.inspector || "-"))}${x.duty && x.duty !== x.inspector ? chip("c-lav", "🧹", "ผู้ปฏิบัติงาน " + x.duty) : ""}${x.pdf ? chip("c-gray", "📄", "หน้า PDF " + x.pdf) : ""}${x.stamp ? chip("c-gray", "🕒", x.stamp) : ""}</div></div>
@@ -716,8 +735,10 @@ function vStat() {
   const key = statKey === "ALL" ? "ALL" : (statKey || keys[0]), inP = r => key === "ALL" || perKeyOf(r.date, per) === key;
   const all = recs.filter(inP), abn = all.filter(r => r.result === "ab"), st = r => effStatus(r);
   const closed = abn.filter(r => st(r) === CLOSED).length, prog = abn.filter(r => st(r) === PROG).length, open = abn.length - closed, wait = open - prog, rate = pct(closed, abn.length);
-  const kpi = (tc, ico, n, label, sub) => `<div class="kpi" style="--tc:${tc}"><i>${ico}</i><div><b>${n}</b><div class="text-sm font-semibold">${label}</div><div class="text-xs" style="color:var(--muted)">${sub}</div></div></div>`;
-  const C = 2 * Math.PI * 26, ring = `<div class="kpi" style="--tc:#8b6fd6"><svg width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="อัตราความสำเร็จ ${rate}%"><circle cx="32" cy="32" r="26" fill="none" stroke="var(--line)" stroke-width="8"/><circle cx="32" cy="32" r="26" fill="none" stroke="var(--done)" stroke-width="8" stroke-linecap="round" stroke-dasharray="${(C * rate / 100).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 32 32)"/><text x="32" y="37" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor">${Math.round(rate)}%</text></svg><div><b>${rate}%</b><div class="text-sm font-semibold">อัตราความสำเร็จ</div><div class="text-xs" style="color:var(--muted)">ปิดแล้ว ${closed} จาก ${abn.length}</div></div></div>`;
+  const mixW = (hex, p) => "#" + [1, 3, 5].map(i => Math.round(parseInt(hex.slice(i, i + 2), 16) * p + 255 * (1 - p)).toString(16).padStart(2, "0")).join(""), shade = (hex, p) => "#" + [1, 3, 5].map(i => Math.round(parseInt(hex.slice(i, i + 2), 16) * p).toString(16).padStart(2, "0")).join("");
+  const tone = tc => `--tc:${tc};--kbg:${mixW(tc, .08)};--kbd:${mixW(tc, .28)};--kic:${mixW(tc, .18)};--ktx:${shade(tc, .8)}`;
+  const kpi = (tc, ico, n, label, sub) => `<div class="kpi" style="${tone(tc)}"><i>${ico}</i><div><b>${n}</b><div class="text-sm font-semibold">${label}</div><div class="text-xs" style="color:var(--muted)">${sub}</div></div></div>`;
+  const C = 2 * Math.PI * 26, ring = `<div class="kpi" style="${tone("#8b6fd6")}"><div style="position:relative;width:64px;height:64px;flex:none"><svg width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="อัตราความสำเร็จ ${rate}%"><circle cx="32" cy="32" r="26" fill="none" stroke="#dfe4ee" stroke-width="8"/><circle cx="32" cy="32" r="26" fill="none" stroke="#2f855a" stroke-width="8" stroke-linecap="round" stroke-dasharray="${(C * rate / 100).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 32 32)"/></svg><span style="position:absolute;inset:0;display:grid;place-items:center;font-weight:700;font-size:.85rem">${Math.round(rate)}%</span></div><div><b>${rate}%</b><div class="text-sm font-semibold">อัตราความสำเร็จ</div><div class="text-xs" style="color:var(--muted)">ปิดแล้ว ${closed} จาก ${abn.length}</div></div></div>`;
   const grp = (rows, f) => { const m = {}; rows.forEach(r => { const k = f(r) || "ไม่ระบุ", g = m[k] ||= {k, n:0, c:0, p:0, w:0}, s2 = st(r); g.n++; s2 === CLOSED ? g.c++ : s2 === PROG ? g.p++ : g.w++; }); return Object.values(m).sort((a, b) => b.n - a.n || a.k.localeCompare(b.k, "th")); };
   const hbar = rows => { if (!rows.length) return `<p class="text-sm" style="color:var(--muted)">ไม่มีข้อมูลในช่วงนี้</p>`; const mx = rows[0].n;
     return rows.slice(0, 12).map(g => `<div class="hb"><div class="hb-l" title="${esc(g.k)}">${esc(g.k)}</div><div class="hb-t" title="ปิดแล้ว ${g.c} · กำลังดำเนินการ ${g.p} · รอติดตาม ${g.w}"><i style="width:${g.c / mx * 100}%;background:var(--done)"></i><i style="width:${g.p / mx * 100}%;background:var(--prog)"></i><i style="width:${g.w / mx * 100}%;background:var(--wait)"></i></div><b class="hb-n">${g.n}</b></div>`).join("") + (rows.length > 12 ? `<p class="text-xs" style="color:var(--muted)">และอีก ${rows.length - 12} กลุ่ม</p>` : ""); };
@@ -730,24 +751,34 @@ function vStat() {
   const tmax = Math.max(1, ...tk.map(k2 => T[k2].c + T[k2].o)), tl = k2 => key === "ALL" || per === "year" ? new Date(k2 + "-01T00:00").toLocaleDateString("th-TH", {month:"short"}) : per === "day" ? k2 : String(+k2.slice(8));
   const trend = tk.length ? `<div class="cols">${tk.map(k2 => { const g = T[k2], tot = g.c + g.o; return `<div class="col-b" title="${esc(k2)} · ปิดแล้ว ${g.c} · ค้าง ${g.o}"><span class="text-xs">${tot}</span><div class="stk" style="height:${tot / tmax * 100}%"><i style="flex:${g.o};background:var(--wait)"></i><i style="flex:${g.c};background:var(--done)"></i></div><span class="col-l">${esc(tl(k2))}</span></div>`; }).join("")}</div>` : `<p class="text-sm" style="color:var(--muted)">ไม่มีข้อมูลในช่วงนี้</p>`;
   const trendTitle = key === "ALL" || per === "year" ? "รายเดือน" : per === "day" ? "แยกตามจุดตรวจ (10 อันดับ)" : "รายวัน";
-  // ตารางรายการ
-  const list = [...abn].sort((a, b) => (sortAsc ? 1 : -1) * (a.date.localeCompare(b.date) || (a.ticket || "").localeCompare(b.ticket || "")));
-  const table = list.length ? `<div style="overflow-x:auto"><table class="dtab"><tr><th>วันที่</th><th>เลขที่ใบงาน</th><th>Zone</th><th>พื้นที่ / จุดตรวจ</th><th>ประเภทปัญหา</th><th>แผนก / ผู้รับผิดชอบ</th><th>กำหนดเสร็จ</th><th>สถานะ</th></tr>${list.slice(0, 200).map(r => `<tr><td>${fmtD(r.date)}</td><td><button class="underline" style="color:var(--brand)" data-act="gotoissue" data-id="${r.id}" data-d="${r.date}">${esc(r.ticket)}</button></td><td>${esc(r.zone || "-")}</td><td>${esc(r.area || "-")}</td><td>${esc(typeOf(r))}</td><td>${esc([r.dept, r.worker].filter(Boolean).join(" / ") || "-")}</td><td>${r.due ? fmtD(r.due) : "–"}</td><td>${statusPill(st(r))}</td></tr>`).join("")}</table></div>${list.length > 200 ? `<p class="text-xs" style="color:var(--muted)">แสดง 200 รายการแรกจาก ${list.length}</p>` : ""}` : `<p class="text-sm" style="color:var(--muted)">ไม่มีรายการในช่วงนี้</p>`;
+  // ตารางรายการ: กรองสถานะ + วันที่ + เรียงลำดับ
+  const dates = [...new Set(abn.map(r => r.date))].sort().reverse(); if (tDate && !dates.includes(tDate)) tDate = "";
+  const rank = r => st(r) === CLOSED ? 1 : 0, dirv = sortAsc ? 1 : -1;
+  const rowsT = abn.filter(r => (tStatus === "all" || (tStatus === "open" ? st(r) !== CLOSED : st(r) === CLOSED)) && (!tDate || r.date === tDate))
+    .sort(tSort === "status" ? (a, b) => (rank(a) - rank(b)) * (sortAsc ? -1 : 1) || b.date.localeCompare(a.date) : (a, b) => dirv * (a.date.localeCompare(b.date) || (a.ticket || "").localeCompare(b.ticket || "")));
+  const arrow = k => tSort === k ? (sortAsc ? "▲" : "▼") : "↕", shBtn = (k, t) => `<button class="thb" data-act="tsort" data-k="${k}" title="คลิกเพื่อเรียง">${t} <span aria-hidden="true">${arrow(k)}</span></button>`;
+  const chipsF = [["all", "ทั้งหมด", abn.length], ["open", "ยังไม่ปิดประเด็น (ค้าง/กำลังดำเนินการ)", open], ["closed", "ปิดประเด็นแล้ว", closed]].map(([v, t, n]) => `<button class="chipbtn" data-act="tstatus" data-k="${v}" aria-pressed="${tStatus === v}">${t} <b>${n}</b></button>`).join("");
+  const table = rowsT.length ? `<div style="overflow-x:auto"><table class="dtab"><tr><th>${shBtn("date", "วันที่")}</th><th>เลขที่ใบงาน</th><th>Zone</th><th>พื้นที่ / จุดตรวจ</th><th>ประเภทปัญหา</th><th>แผนก / ผู้รับผิดชอบ</th><th>กำหนดเสร็จ</th><th>${shBtn("status", "สถานะ")}</th></tr>${rowsT.slice(0, 200).map(r => `<tr><td>${fmtD(r.date)}</td><td><button class="underline" style="color:var(--brand)" data-act="gotoissue" data-id="${r.id}" data-d="${r.date}" title="เปิดการ์ดเพื่อแก้ไข">${esc(r.ticket)}</button></td><td>${esc(r.zone || "-")}</td><td>${esc(r.area || "-")}</td><td>${esc(typeOf(r))}</td><td>${esc([r.dept, r.worker].filter(Boolean).join(" / ") || "-")}</td><td>${r.due ? fmtD(r.due) : "–"}</td><td>${statusPill(st(r))}</td></tr>`).join("")}</table></div>${rowsT.length > 200 ? `<p class="text-xs" style="color:var(--muted)">แสดง 200 รายการแรกจาก ${rowsT.length}</p>` : ""}` : `<p class="text-sm" style="color:var(--muted)">ไม่มีรายการตามตัวกรองนี้</p>`;
   // สถิติรายจุดตรวจ (ตามช่วงที่เลือก)
   const P = {}; all.forEach(r => { const p = P[ptKey(r)] ||= {k:ptKey(r), n:0, a:0, cats:{}, items:[]}; p.n++; if (r.result === "ab") { p.a++; p.cats[r.category || FALLBACK] = (p.cats[r.category || FALLBACK] || 0) + 1; p.items.push(r); } });
   const pts = Object.values(P).filter(p => !ptq || norm(p.k).includes(norm(ptq))).sort((a, b) => b.a - a.a || b.n - a.n);
+  const expBtn = `<span style="position:relative"><button class="btn" data-act="expmenu" aria-expanded="${expMenu}" aria-haspopup="menu">⬇ Export รายงาน ▾</button>${expMenu ? `<div class="menu" role="menu"><button role="menuitem" data-act="dexp" data-k="png">🖼 บันทึกเป็นรูปภาพ (PNG)</button><button role="menuitem" data-act="dexp" data-k="copy">📋 คัดลอกรูปภาพ (Copy Image)</button><button role="menuitem" data-act="dexp" data-k="pdf">📄 บันทึกเป็น PDF (A4 แนวนอน)</button></div>` : ""}</span>`;
+  const headHtml = `<div class="flex flex-wrap items-end justify-between gap-2"><div><div class="dh1">รายงานสรุปสถิติผลตรวจเวรวันหยุด</div><div class="text-sm" style="color:var(--muted)">บริษัท ไอ-เทล คอร์ปอเรชั่น จำกัด (มหาชน)</div></div><div class="text-sm" style="text-align:right">ช่วงเวลา: <b>${key === "ALL" ? "ทุกช่วง" : esc(perLabel(key, per))}</b><br><span data-exp style="color:var(--muted)"></span></div></div>`;
   const opts = `<option value="ALL" ${key === "ALL" ? "selected" : ""}>ทุกช่วง (ทั้งหมด)</option>` + keys.map(k2 => `<option value="${k2}" ${k2 === key ? "selected" : ""}>${esc(perLabel(k2, per))}</option>`).join(""), ki = keys.indexOf(key);
-  return `<section class="card p-4 mb-4"><div class="flex flex-wrap items-center justify-between gap-3">
+  return `<div id="dashCap" class="dcap"><section class="card p-4 mb-4 no-cap"><div class="flex flex-wrap items-center justify-between gap-3">
       <div class="seg flex" style="min-width:20rem" role="group" aria-label="ช่วงเวลา">${[["day", "รายวัน"], ["week", "รายสัปดาห์"], ["month", "รายเดือน"], ["year", "ภาพรวมทั้งปี"]].map(([v, t]) => `<button data-act="per" data-p="${v}" aria-pressed="${per === v}" style="${per === v ? "background:var(--brand)" : ""}">${t}</button>`).join("")}</div>
-      <div class="flex items-center gap-2"><button class="btn2" data-act="statnav" data-dir="-1" aria-label="ช่วงก่อนหน้า" ${ki < 0 || ki >= keys.length - 1 ? "disabled" : ""}>◀</button><select id="statSel" class="inp" style="width:auto;min-width:12rem" aria-label="เลือกช่วงเวลา">${opts}</select><button class="btn2" data-act="statnav" data-dir="1" aria-label="ช่วงถัดไป" ${ki <= 0 ? "disabled" : ""}>▶</button></div></div>
+      <div class="flex items-center gap-2"><button class="btn2" data-act="statnav" data-dir="-1" aria-label="ช่วงก่อนหน้า" ${ki < 0 || ki >= keys.length - 1 ? "disabled" : ""}>◀</button><select id="statSel" class="inp" style="width:auto;min-width:12rem" aria-label="เลือกช่วงเวลา">${opts}</select><button class="btn2" data-act="statnav" data-dir="1" aria-label="ช่วงถัดไป" ${ki <= 0 ? "disabled" : ""}>▶</button>${expBtn}</div></div>
     <p class="text-xs mt-2" style="color:var(--muted)">กำลังแสดง: <b>${key === "ALL" ? "ทุกช่วง" : esc(perLabel(key, per))}</b> · ตรวจ ${all.length} จุด · พบปัญหา ${abn.length} (${pct(abn.length, all.length)}%)</p></section>
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">${kpi("#4f63d2", "📋", abn.length, "รายการทั้งหมด", `พบปัญหาจากการตรวจ ${all.length} จุด`)}${kpi("#2f855a", "✅", closed, "ปิดประเด็นแล้ว", `${pct(closed, abn.length)}% ของรายการ`)}${kpi("#b7791f", "⏳", open, "อยู่ระหว่างติดตาม", `รอติดตาม ${wait} · กำลังดำเนินการ ${prog}`)}${ring}</div>
-  <div class="grid lg:grid-cols-2 gap-4 mb-4">
+  <div class="dblk" id="dblk1"><div class="cap-only dhead">${headHtml}</div><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">${kpi("#4f63d2", "📋", abn.length, "รายการทั้งหมด", `พบปัญหาจากการตรวจ ${all.length} จุด`)}${kpi("#2f855a", "✅", closed, "ปิดประเด็นแล้ว", `${pct(closed, abn.length)}% ของรายการ`)}${kpi("#b7791f", "⏳", open, "อยู่ระหว่างติดตาม", `รอติดตาม ${wait} · กำลังดำเนินการ ${prog}`)}${ring}</div></div>
+  <div class="dblk" id="dblk2"><div class="grid lg:grid-cols-2 gap-4 mb-4">
     <section class="card p-4"><h2 class="font-semibold mb-1">แยกตามประเภทปัญหา</h2>${legend}${hbar(byType)}</section>
     <section class="card p-4"><div class="flex flex-wrap items-center justify-between gap-2"><h2 class="font-semibold">แยกตาม${grpBy === "dept" ? "แผนก" : "ผู้รับผิดชอบ"}</h2>
-      <div class="seg flex" style="min-width:12rem" role="group">${[["dept", "แผนก"], ["worker", "ผู้รับผิดชอบ"]].map(([v, t]) => `<button data-act="grp" data-g="${v}" aria-pressed="${grpBy === v}" style="${grpBy === v ? "background:var(--brand)" : ""}">${t}</button>`).join("")}</div></div>${legend}${hbar(byDept)}</section></div>
-  <section class="card p-4 mb-4"><div class="flex flex-wrap items-center justify-between gap-2"><h2 class="font-semibold">แนวโน้มรายการที่พบ — ${trendTitle}</h2><div class="legend"><span><i style="background:var(--wait)"></i>ค้าง</span><span><i style="background:var(--done)"></i>ปิดแล้ว</span></div></div>${trend}</section>
-  <section class="card p-4 mb-4"><div class="flex flex-wrap items-center justify-between gap-2 mb-2"><h2 class="font-semibold">ตารางรายการ (${abn.length})</h2><button class="btn2 text-xs" data-act="sortdir">${sortAsc ? "เก่า → ใหม่ ▲" : "ใหม่ → เก่า ▼"}</button></div>${table}</section>
+      <div class="seg flex no-cap" style="min-width:12rem" role="group">${[["dept", "แผนก"], ["worker", "ผู้รับผิดชอบ"]].map(([v, t]) => `<button data-act="grp" data-g="${v}" aria-pressed="${grpBy === v}" style="${grpBy === v ? "background:var(--brand)" : ""}">${t}</button>`).join("")}</div></div>${legend}${hbar(byDept)}</section></div></div>
+  <div class="dblk" id="dblk3"><section class="card p-4 mb-4"><div class="flex flex-wrap items-center justify-between gap-2"><h2 class="font-semibold">แนวโน้มรายการที่พบ — ${trendTitle}</h2><div class="legend"><span><i style="background:var(--wait)"></i>ค้าง</span><span><i style="background:var(--done)"></i>ปิดแล้ว</span></div></div>${trend}</section></div></div>
+  <section class="card p-4 mb-4"><div class="flex flex-wrap items-center justify-between gap-2 mb-3"><h2 class="font-semibold">ตารางรายการ (${rowsT.length}${rowsT.length !== abn.length ? " จาก " + abn.length : ""})</h2>
+    <div class="flex flex-wrap items-center gap-2"><select id="tDateSel" class="inp" style="width:auto;min-width:11rem" aria-label="กรองวันที่ตรวจ"><option value="">ทุกวันที่ตรวจ</option>${dates.map(d => `<option value="${d}" ${d === tDate ? "selected" : ""}>${fmtD(d)}</option>`).join("")}</select>
+    <button class="btn2 text-xs" data-act="sortdir">${tSort === "date" && sortAsc ? "เก่า → ใหม่ ▲" : "ใหม่ → เก่า ▼"}</button></div></div>
+    <div class="flex flex-wrap gap-2 mb-3" role="group" aria-label="กรองสถานะ">${chipsF}</div>${table}</section>
   <section class="card p-4"><div class="flex flex-wrap items-center justify-between gap-2 mb-2"><h2 class="font-semibold">สถิติรายจุดตรวจ</h2>
     <input type="search" id="ptq" class="inp" style="max-width:16rem" placeholder="ค้นหาจุด/พื้นที่" value="${esc(ptq)}"></div>
     ${pts.map(p => { const o = openPts.has(p.k), pc = pct(p.a, p.n);
@@ -791,7 +822,12 @@ V.addEventListener("click", async e => {
   else if (a === "pt") { const k = b.dataset.k; openPts.has(k) ? openPts.delete(k) : openPts.add(k); }
   else if (a === "per") { per = b.dataset.p; statKey = ""; }
   else if (a === "grp") grpBy = b.dataset.g;
-  else if (a === "sortdir") sortAsc = !sortAsc;
+  else if (a === "sortdir") { tSort === "date" ? sortAsc = !sortAsc : (tSort = "date", sortAsc = false); }
+  else if (a === "tsort") { const k = b.dataset.k; tSort === k ? sortAsc = !sortAsc : (tSort = k, sortAsc = false); }
+  else if (a === "tstatus") tStatus = b.dataset.k;
+  else if (a === "expmenu") expMenu = !expMenu;
+  else if (a === "dexp") { expMenu = false; render(); doExport(b.dataset.k); return; }
+  else if (a === "gotoday") { document.querySelector(`[data-dayhdr="${b.dataset.d}"]`)?.scrollIntoView({behavior:"smooth", block:"start"}); return; }
   else if (a === "statnav") { const ks = statKeys(), i = ks.indexOf(statKey && statKey !== "ALL" ? statKey : ks[0]), j = i - (+b.dataset.dir); if (j >= 0 && j < ks.length) statKey = ks[j]; }
   else if (a === "gotoissue") { view = "day"; openDays.add(b.dataset.d); openCards.add(b.dataset.id); animNext = true; setTimeout(() => document.querySelector(`article[data-id="${b.dataset.id}"]`)?.scrollIntoView({block:"center"}), 80); }
   else if (a === "ph") { lb = {list:arrOf(b.dataset.dz), i:+b.dataset.i}; showLb(); $("#lb").showModal(); return; }
@@ -820,7 +856,7 @@ V.addEventListener("click", async e => {
   save(); render();
 });
 V.addEventListener("change", e => {
-  const t = e.target, f = t.dataset.f; if (t.dataset.addfile) { addPhotos(t.dataset.addfile, t.files); t.value = ""; return; } if (!f) { if (t.id === "fst") { fst = t.value; render(); } else if (t.id === "fz") { fz = t.value; render(); } else if (t.id === "fa") { fa = t.value; render(); } else if (t.id === "statSel") { statKey = t.value; render(); } else if (t.id === "fc") { fc = t.value; render(); } else if (t.id === "showOk") { showOk = t.checked; render(); } return; }
+  const t = e.target, f = t.dataset.f; if (t.dataset.addfile) { addPhotos(t.dataset.addfile, t.files); t.value = ""; return; } if (!f) { if (t.id === "fst") { fst = t.value; render(); } else if (t.id === "fz") { fz = t.value; render(); } else if (t.id === "fa") { fa = t.value; render(); } else if (t.id === "statSel") { statKey = t.value; render(); } else if (t.id === "tDateSel") { tDate = t.value; render(); } else if (t.id === "fc") { fc = t.value; render(); } else if (t.id === "showOk") { showOk = t.checked; render(); } return; }
   const r = recs.find(x => x.id === t.closest("article")?.dataset.id), s = r && t.dataset.sid && r.subs.find(x => x.id === t.dataset.sid), v = t.value.trim();
   if (f === "category" || f === "worker" || f === "due" || f === "dept") r[f] = t.value;
   else if (f === "note") r.note = t.value;
@@ -871,6 +907,37 @@ $("#camSw").onclick = () => { camFacing = camFacing === "environment" ? "user" :
 $("#camSnap").onclick = async () => { const v = $("#camV"); if (!v.videoWidth) return toast("กล้องยังไม่พร้อม");
   const c = document.createElement("canvas"), k = Math.min(1, 960 / v.videoWidth); c.width = Math.round(v.videoWidth * k); c.height = Math.round(v.videoHeight * k); c.getContext("2d").drawImage(v, 0, 0, c.width, c.height);
   const blob = await new Promise(r => c.toBlob(r, "image/jpeg", .85)); await addPhotos(camDz, [new File([blob], "camera.jpg", {type:"image/jpeg"})]); };
+/* ===== Export Dashboard: PNG / Copy Image / PDF (A4 แนวนอน) ===== */
+async function withCap(fn) { const w = $("#dashCap"); if (!w) throw new Error("เปิดแท็บสถิติก่อน"); w.classList.add("capturing"); w.querySelectorAll("[data-exp]").forEach(e => e.textContent = "ส่งออกเมื่อ " + fmtT(Date.now()));
+  try { try { await document.fonts.ready; } catch {} await new Promise(r => setTimeout(r, 80)); return await fn(); } finally { w.classList.remove("capturing"); } }
+const h2c = el => html2canvas(el, {scale:2, useCORS:true, backgroundColor:"#ffffff", logging:false});
+const toBlob = (c, type = "image/png", q) => new Promise(r => c.toBlob(r, type, q));
+async function doExport(kind) {
+  if (!window.html2canvas) return toast("โหลดไลบรารีสร้างภาพไม่สำเร็จ (ตรวจสอบอินเทอร์เน็ต)");
+  const name = `สถิติตรวจเวร_${new Date().toLocaleDateString("sv").replace(/-/g, "")}`;
+  try {
+    if (kind === "copy") {
+      if (navigator.clipboard?.write && window.ClipboardItem) { await navigator.clipboard.write([new ClipboardItem({"image/png": withCap(() => h2c($("#dashCap"))).then(c => toBlob(c))})]); return toast("คัดลอกรูปแล้ว — วางลงในอีเมลได้เลย (Ctrl+V)"); }
+      toast("เบราว์เซอร์นี้ไม่รองรับการคัดลอกรูป — บันทึกเป็นไฟล์ PNG แทน"); kind = "png";
+    }
+    toast("กำลังสร้างรายงาน…");
+    if (kind === "png") { const c = await withCap(() => h2c($("#dashCap"))); return await saveBin(name + ".png", await (await toBlob(c)).arrayBuffer(), "image/png"); }
+    if (!window.jspdf) return toast("โหลดไลบรารี PDF ไม่สำเร็จ");
+    const cvs = await withCap(async () => { const o = []; for (const id of ["dblk1", "dblk2", "dblk3"]) { const el = document.getElementById(id); if (el) o.push(await h2c(el)); } return o; });
+    const pdf = new jspdf.jsPDF({orientation:"l", unit:"mm", format:"a4"}), M = 10, PW = 297 - 2 * M, PH = 210 - 2 * M; let y = M;
+    cvs.forEach(c => { let w = PW, h = c.height / c.width * w; if (h > PH) { h = PH; w = c.width / c.height * h; } if (y + h > M + PH + .5) { pdf.addPage(); y = M; }
+      pdf.addImage(c.toDataURL("image/jpeg", .92), "JPEG", M + (PW - w) / 2, y, w, h); y += h + 4; });
+    await saveBin(name + ".pdf", pdf.output("arraybuffer"), "application/pdf");
+  } catch (e) { toast("ส่งออกไม่สำเร็จ: " + (e.message || e.name)); }
+}
+document.addEventListener("click", e => { if (expMenu && !e.target.closest(".menu,[data-act=expmenu]")) { expMenu = false; if (view === "stat") render(); } });
+/* ===== ปุ่มลอย: กลับด้านบน + ข้ามไปวันที่ ===== */
+function fabUpdate() { const y = scrollY, jb = $("#jumpBtn"); $("#topBtn").hidden = y < 300; jb.hidden = view !== "day" || y < 300 || !recs.length; if (jb.hidden) $("#jumpMenu").hidden = true; }
+addEventListener("scroll", fabUpdate, {passive:true});
+$("#topBtn").onclick = () => scrollTo({top:0, behavior:"smooth"});
+$("#jumpBtn").onclick = () => { const m = $("#jumpMenu"); if (!m.hidden) { m.hidden = true; return; } const g = {}; recs.forEach(r => g[r.date] = (g[r.date] || 0) + 1);
+  m.innerHTML = Object.keys(g).sort().reverse().map(d => `<button role="menuitem" data-d="${d}">${fmtD(d)} <span class="text-xs" style="color:var(--muted)">(${g[d]} จุด)</span></button>`).join(""); m.hidden = false; };
+$("#jumpMenu").onclick = e => { const b = e.target.closest("[data-d]"); if (!b) return; $("#jumpMenu").hidden = true; const d = b.dataset.d; openDays.add(d); render(); setTimeout(() => document.querySelector(`[data-dayhdr="${d}"]`)?.scrollIntoView({behavior:"smooth", block:"start"}), 60); };
 /* ===== Lightbox ===== */
 let lb = {list:[], i:0};
 const showLb = () => { $("#lbI").src = lb.list[lb.i]; $("#lbN").textContent = `${lb.i + 1} / ${lb.list.length}`; };
@@ -1023,7 +1090,7 @@ function festivalOf(dt) {
     };
     src.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(SVG);
   };
-  probe.src = "icons/icon-192.png";
+  probe.src = "icon-192.png";
 })();
 startSync();
 render();
