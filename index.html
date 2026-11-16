@@ -217,13 +217,13 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 .kpi>i{font-style:normal;display:grid;place-items:center;width:2.8rem;height:2.8rem;border-radius:14px;font-size:1.4rem;background:color-mix(in srgb,var(--tc) 16%,var(--card))}
 .kpi b{display:block;font-size:1.7rem;line-height:1.1;color:color-mix(in srgb,var(--tc) 85%,var(--ink))}
 .hb{display:grid;grid-template-columns:minmax(5rem,9.5rem) 1fr 2rem;gap:.6rem;align-items:center;font-size:.82rem;margin:.4rem 0}
-.hb-l{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hb-n{text-align:right}
+.hb-l{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.6;padding:2px 0 3px}.hb-n{text-align:right}
 .hb-t{display:flex;height:.95rem;border-radius:999px;overflow:hidden;background:color-mix(in srgb,var(--line) 70%,transparent)}.hb-t i{display:block;height:100%}
 .legend{display:flex;flex-wrap:wrap;gap:.2rem .9rem;font-size:.74rem;color:var(--muted);margin:.25rem 0 .4rem}.legend i{display:inline-block;width:.7rem;height:.7rem;border-radius:3px;margin-right:.3rem;vertical-align:-1px}
-.cols{display:flex;align-items:flex-end;gap:.4rem;height:170px;overflow-x:auto;padding:.4rem 0 .1rem}
-.col-b{flex:1 0 2rem;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.cols{display:flex;align-items:flex-end;gap:.4rem;min-height:200px;overflow-x:auto;overflow-y:hidden;padding:.9rem 0 .3rem}
+.col-b{flex:1 0 2rem;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}.col-b .cn{line-height:1.6;padding:2px 0 3px}
 .col-b .stk{width:70%;min-width:16px;min-height:3px;display:flex;flex-direction:column;border-radius:8px 8px 0 0;overflow:hidden}.col-b .stk i{display:block}
-.col-l{font-size:.7rem;color:var(--muted);margin-top:.25rem;white-space:nowrap;max-width:5.5rem;overflow:hidden;text-overflow:ellipsis}
+.col-l{font-size:.7rem;color:var(--muted);margin-top:.25rem;white-space:nowrap;max-width:5.5rem;overflow:hidden;text-overflow:ellipsis;line-height:1.6;padding:2px 0 4px}
 .dtab{width:100%;border-collapse:separate;border-spacing:0;font-size:.82rem;min-width:44rem}
 .dtab th{position:sticky;top:0;background:color-mix(in srgb,var(--brand) 8%,var(--card));text-align:left;padding:.5rem .6rem;font-weight:700;border-bottom:1px solid var(--line)}
 .dtab td{padding:.5rem .6rem;border-bottom:1px solid var(--line);vertical-align:middle}.dtab tr:hover td{background:color-mix(in srgb,var(--brand) 5%,var(--card))}
@@ -749,7 +749,7 @@ function vStat() {
   const T = {}; abn.forEach(r => { const g = T[subK(r)] ||= {c:0, o:0}; st(r) === CLOSED ? g.c++ : g.o++; });
   let tk = Object.keys(T).sort(); if (per === "day" && key !== "ALL") tk = tk.sort((a, b) => (T[b].c + T[b].o) - (T[a].c + T[a].o)).slice(0, 10);
   const tmax = Math.max(1, ...tk.map(k2 => T[k2].c + T[k2].o)), tl = k2 => key === "ALL" || per === "year" ? new Date(k2 + "-01T00:00").toLocaleDateString("th-TH", {month:"short"}) : per === "day" ? k2 : String(+k2.slice(8));
-  const trend = tk.length ? `<div class="cols">${tk.map(k2 => { const g = T[k2], tot = g.c + g.o; return `<div class="col-b" title="${esc(k2)} · ปิดแล้ว ${g.c} · ค้าง ${g.o}"><span class="text-xs">${tot}</span><div class="stk" style="height:${tot / tmax * 100}%"><i style="flex:${g.o};background:var(--wait)"></i><i style="flex:${g.c};background:var(--done)"></i></div><span class="col-l">${esc(tl(k2))}</span></div>`; }).join("")}</div>` : `<p class="text-sm" style="color:var(--muted)">ไม่มีข้อมูลในช่วงนี้</p>`;
+  const trend = tk.length ? `<div class="cols">${tk.map(k2 => { const g = T[k2], tot = g.c + g.o; return `<div class="col-b" title="${esc(k2)} · ปิดแล้ว ${g.c} · ค้าง ${g.o}"><span class="cn text-xs">${tot}</span><div class="stk" style="height:${Math.max(4, Math.round(tot / tmax * 120))}px"><i style="flex:${g.o};background:var(--wait)"></i><i style="flex:${g.c};background:var(--done)"></i></div><span class="col-l">${esc(tl(k2))}</span></div>`; }).join("")}</div>` : `<p class="text-sm" style="color:var(--muted)">ไม่มีข้อมูลในช่วงนี้</p>`;
   const trendTitle = key === "ALL" || per === "year" ? "รายเดือน" : per === "day" ? "แยกตามจุดตรวจ (10 อันดับ)" : "รายวัน";
   // ตารางรายการ: กรองสถานะ + วันที่ + เรียงลำดับ
   const dates = [...new Set(abn.map(r => r.date))].sort().reverse(); if (tDate && !dates.includes(tDate)) tDate = "";
@@ -910,7 +910,25 @@ $("#camSnap").onclick = async () => { const v = $("#camV"); if (!v.videoWidth) r
 /* ===== Export Dashboard: PNG / Copy Image / PDF (A4 แนวนอน) ===== */
 async function withCap(fn) { const w = $("#dashCap"); if (!w) throw new Error("เปิดแท็บสถิติก่อน"); w.classList.add("capturing"); w.querySelectorAll("[data-exp]").forEach(e => e.textContent = "ส่งออกเมื่อ " + fmtT(Date.now()));
   try { try { await document.fonts.ready; } catch {} await new Promise(r => setTimeout(r, 80)); return await fn(); } finally { w.classList.remove("capturing"); } }
-const h2c = el => html2canvas(el, {scale:2, useCORS:true, backgroundColor:"#ffffff", logging:false});
+/* แก้ตัวอักษรไทยแหว่ง (สระ/วรรณยุกต์บน-ล่างถูกตัด): ปรับสไตล์เฉพาะสำเนาที่ html2canvas ใช้แคป ไม่กระทบหน้าจอจริง */
+function fixThaiClone(doc) {
+  doc.querySelectorAll("#dashCap .truncate, #dashCap .trunc, #dashCap [class*=line-clamp]").forEach(n => n.classList.remove("truncate", "trunc", ...[...n.classList].filter(c => c.startsWith("line-clamp"))));
+  const st = doc.createElement("style");
+  st.textContent = `
+    #dashCap, #dashCap * { line-height:1.6 !important; text-overflow:clip !important; }
+    #dashCap :not(.hb-t):not(.stk) { overflow:visible !important; }
+    #dashCap .hb-l { white-space:normal !important; padding:2px 0 4px !important; word-break:break-word; }
+    #dashCap .hb-n, #dashCap .legend span, #dashCap .text-xs, #dashCap .text-sm { padding-top:2px !important; padding-bottom:4px !important; }
+    #dashCap .kpi b { line-height:1.4 !important; padding-bottom:2px !important; }
+    #dashCap h2, #dashCap .dh1 { padding-top:3px !important; padding-bottom:5px !important; }
+    #dashCap .cols { min-height:236px !important; padding:34px 0 10px !important; overflow:visible !important; }
+    #dashCap .col-b { height:auto !important; }
+    #dashCap .col-b .cn { padding:2px 0 6px !important; min-height:2rem; }
+    #dashCap .col-l { max-width:none !important; white-space:nowrap !important; padding:4px 0 8px !important; margin-top:2px !important; }
+    #dashCap .dhead { padding-bottom:1rem !important; }`;
+  doc.head.appendChild(st);
+}
+const h2c = el => html2canvas(el, {scale:2, useCORS:true, backgroundColor:"#ffffff", logging:false, onclone: fixThaiClone});
 const toBlob = (c, type = "image/png", q) => new Promise(r => c.toBlob(r, type, q));
 async function doExport(kind) {
   if (!window.html2canvas) return toast("โหลดไลบรารีสร้างภาพไม่สำเร็จ (ตรวจสอบอินเทอร์เน็ต)");
