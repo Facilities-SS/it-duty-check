@@ -1425,7 +1425,7 @@ function vStat() {
     <p class="text-xs mt-2" style="color:var(--muted)">กำลังแสดง: <b>${key === "ALL" ? "ทุกช่วง" : esc(perLabel(key, per))}</b> · อ้างอิงมาตรฐาน ${TOTAL_ZONES} โซน (${TOTAL_POINTS} จุดตรวจ · ตรวจแล้ว ${ptsCheckedCount} รายการใน 13 Zone · นอก Zone ${extraAll.length} รายการ)</p></section>
   <div class="dblk" id="dblk1"><div class="cap-only dhead">${headHtml}</div>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-      ${kpi("#4f63d2", "📋", abn.length, "รายการตรวจพบปัญหาทั้งหมด", `ตรวจทั้งหมด ${all.length} · ปกติ ${okAllCount}`)}
+      ${kpi("#4f63d2", "📋", abn.length, "รายการตรวจพบปัญหาทั้งหมด", "")}
       ${kpi("#2f855a", "✅", closed, "ปิดประเด็นแล้ว", `${pct(closed, abn.length)}% ของรายการปัญหา`)}
       ${kpi("#b7791f", "⏳", openCount, "อยู่ระหว่างติดตาม", `รอติดตาม ${wait} · กำลังดำเนินการ ${prog}`)}
       ${ring}
