@@ -492,8 +492,8 @@ const FIELDS = {
   order:{ex:["ลำดับ","ลำดับที่","เลขที่","item"], kw:["ลำดับ"]},
   date:{ex:["วันที่ตรวจ","วันที่","date","วัน-เวลา"], kw:["วัน","date"]},
   entryType:{ex:["ประเภท","ชนิด","ประเภทการตรวจ"], kw:["ประเภท"]},
-  zone:{ex:["พื้นที่","พื้นที่ตรวจ","area","สถานที่","location"], kw:["พื้นที่","สถานที่","area","location"]},
-  area:{ex:["โซน","จุดตรวจ","subzone","จุดตรวจย่อย"], kw:["โซน","จุดตรวจ","subzone"]},
+  zone:{ex:["zone","พื้นที่","พื้นที่ตรวจ","โซนหลัก"], kw:["zone","พื้นที่"]},
+  area:{ex:["location","โซน","จุดตรวจ","subzone","จุดตรวจย่อย","สถานที่"], kw:["location","โซน","จุดตรวจ","subzone","สถานที่"]},
   result:{ex:["ผลตรวจ","ผลการตรวจ","พบ/ไม่พบ","สถานะ","status","result","ผล"], kw:["ผล","result","สถานะ"]},
   type:{ex:["ประเภทปัญหา","category","หมวดหมู่","type"], kw:["หมวด","category","type"]},
   detail:{ex:["รายละเอียดที่พบ","รายละเอียด","ปัญหาที่พบ","detail","ปัญหา","สิ่งที่พบ","remark"], kw:["รายละเอียด","detail","ปัญหา","remark"]},
@@ -543,7 +543,7 @@ function findHeaderRow(rows) {
   for (let h = 0; h < Math.min(rows.length - 1, 35); h++) {
     const hs = rows[h].map(nh);
     const hasType = hs.includes(nh("ประเภท")) || hs.some(x => x.includes(nh("ประเภท")));
-    const hasArea = hs.includes(nh("พื้นที่")) || hs.some(x => x.includes(nh("พื้นที่")));
+    const hasArea = hs.includes(nh("พื้นที่")) || hs.includes(nh("zone")) || hs.some(x => x.includes(nh("พื้นที่")) || x === nh("zone"));
     const m = mapCols(rows[h]);
     const n = Object.values(m.col).filter(i => i >= 0).length;
     const bonus = (hasType && hasArea) ? 5000 : 0;
@@ -1066,7 +1066,8 @@ function render() {
 function vDay() {
   const byDate = {}; recs.forEach(r => (byDate[r.date] ||= []).push(r));
   const nq = norm(q), filtering = !!(q || fst || fz || fa || fc);
-  const zm = r => (!fz || canonZone(r.zone, r.area, r.entryType) === fz) && (!fa || r.area === fa);
+  const normPt = s => String(s || "").replace(/\s+/g, " ").replace(/\s*\/\s*/g, "/").trim().toLowerCase();
+  const zm = r => (!fz || canonZone(r.zone, r.area, r.entryType) === fz) && (!fa || normPt(r.area) === normPt(fa));
   const dates = Object.keys(byDate).sort().reverse();
   const html = dates.map(d => {
     const all = byDate[d];
@@ -1101,13 +1102,19 @@ function vDay() {
     return `<section class="card overflow-hidden" data-dayhdr="${d}">${hdr}${body}</section>`;
   }).join("");
 
-  const allZoneVals = [...new Set([...ZONE_MASTER.map(z => z.id), ...recs.map(r => canonZone(r.zone, r.area, r.entryType)).filter(Boolean)])].sort(natSortStr);
-  const as = [...new Set(recs.map(r => r.area).filter(v => v && v !== "-"))].sort((a, b) => String(a).localeCompare(String(b), "th", {numeric:true}));
+  const allZoneVals = ZONE_MASTER.map(z => z.id);
+  const masterPtsForZone = (() => {
+    const sel = fz ? ZONE_MASTER.filter(z => z.id === fz) : ZONE_MASTER;
+    const out = [];
+    sel.forEach(z => z.points.forEach(p => out.push(p)));
+    return out;
+  })();
+  const as = masterPtsForZone;
   const cs = [...new Set(recs.map(r => r.category).filter(Boolean))].sort();
   return `<div class="card p-4 grid grid-cols-2 sm:grid-cols-6 gap-3 mb-4">
     <input type="search" id="q" class="inp col-span-2" placeholder="ค้นหา เลขที่ใบงาน / Zone / จุดตรวจ / รายละเอียด" value="${esc(q)}">
     <select id="fst" class="inp" aria-label="สถานะ"><option value="">ทุกสถานะ</option>${STATUS.map(s => `<option ${s === fst ? "selected" : ""}>${s}</option>`).join("")}</select>
-    <select id="fz" class="inp" aria-label="ตัวกรองโซน (Zone)"><option value="">ทุกโซน (Zone1–Zone13 / อื่นๆ)</option>${allZoneVals.map(z => `<option ${z === fz ? "selected" : ""}>${esc(z)}</option>`).join("")}</select>
+    <select id="fz" class="inp" aria-label="ตัวกรองโซน (Zone)"><option value="">ทุกโซน (Zone1–Zone13)</option>${allZoneVals.map(z => `<option ${z === fz ? "selected" : ""}>${esc(z)}</option>`).join("")}</select>
     <select id="fa" class="inp" aria-label="ตัวกรองจุดตรวจย่อย"><option value="">ทุกจุดตรวจย่อย</option>${as.map(z => `<option ${z === fa ? "selected" : ""}>${esc(z)}</option>`).join("")}</select>
     <select id="fc" class="inp" aria-label="ค้นหาตามหมวดหมู่"><option value="">ทุกหมวดหมู่</option>${cs.map(c => `<option ${c === fc ? "selected" : ""}>${esc(c)}</option>`).join("")}</select>
     <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="showOk" ${showOk ? "checked" : ""}> แสดงจุดที่ปกติ</label>
@@ -1160,7 +1167,7 @@ function card(x) {
   };
   const chip = (cls, ico, t) => t ? `<span class="chip ${cls}">${ico} ${esc(t)}</span>` : "";
   const zc = canonZone(x.zone, x.area, x.entryType), ac = x.area && x.area !== "-" ? x.area : "";
-  const zoneOptions = [...new Set([...ZONE_MASTER.map(z => z.id), zc].filter(Boolean))].sort(natSortStr);
+  const zoneOptions = ZONE_MASTER.map(z => z.id);
   return `<article class="card tk ${flashId === x.id ? "flash" : ""}" data-id="${x.id}" style="border-left:5px solid ${SC[st]};${done ? "opacity:.92" : ""}">
     <div class="tk-head"><b class="font-mono text-sm">${x.order ? "#" + x.order + " · " : ""}${done ? "✓ " : ""}${esc(x.ticket)}</b>
       <span class="flex flex-wrap items-center gap-2"><button class="btn2 text-xs" data-act="gotoday" data-d="${x.date}" title="เลื่อนกลับไปหัวข้อวันที่นี้" aria-label="กลับไปหัวข้อวันที่ ${esc(fmtD(x.date))}">⤴ ${fmtD(x.date)}</button>${done ? `<button class="btn2 text-xs" data-act="cardtoggle" data-id="${x.id}" aria-expanded="true">▴ ย่อการ์ด</button>` : ""}${late(x) ? `<span class="pill" style="background:var(--bad)">เกินกำหนด</span>` : ""}${statusPill(st)}</span></div>
@@ -1329,7 +1336,7 @@ function vStat() {
   const extraW = extraAb.filter(r => st(r) === WAIT).length;
   const extraOk = extraRows.length - extraAb.length;
 
-  const zMax = Math.max(1, ...zone13Stats.map(z => z.tot), extraRows.length);
+  const zMax = Math.max(1, ...zone13Stats.map(z => z.tot));
   const progBadgeHtml = (p, w) => {
     const chips = [];
     if (p > 0) chips.push(`<span style="display:inline-block;padding:1px 6px;border-radius:999px;background:color-mix(in srgb,var(--prog) 16%,transparent);color:var(--prog);font-weight:700">กำลัง ${p}</span>`);
@@ -1354,18 +1361,6 @@ function vStat() {
         <span class="col-l font-semibold" style="color:${active ? "var(--brand)" : "var(--ink)"}">${z.id.replace("Zone", "Z")}</span>
       </button>`;
     }).join("")}
-    <button type="button" class="col-b" data-act="zonetoggle" data-z="EXTRA" style="cursor:pointer;background:none;border:0;padding:0;border-left:1.5px dashed var(--line);padding-left:.45rem" title="${esc(`นอก 13 Zone: ตรวจทั้งหมด ${extraRows.length} (พบปัญหา ${extraAb.length}: ปิด ${extraC} · กำลังดำเนินการ ${extraP} · รอติดตาม ${extraW} | ไม่พบปัญหา ${extraOk}) — คลิกดูรายการ`)}">
-      <span class="cn text-xs font-bold" style="color:#7c3aed">${extraRows.length}</span>
-      ${progBadgeHtml(extraP, extraW)}
-      <div class="stk mt-1" style="height:${extraRows.length ? Math.max(10, Math.round(extraRows.length / zMax * 116)) : 4}px;width:72%;max-width:34px;${openZones.has("EXTRA") ? "outline:2px solid #7c3aed;outline-offset:2px" : ""}">
-        ${extraW ? `<i style="flex:${extraW};background:var(--wait)"></i>` : ""}
-        ${extraP ? `<i style="flex:${extraP};background:var(--prog)"></i>` : ""}
-        ${extraC ? `<i style="flex:${extraC};background:var(--done)"></i>` : ""}
-        ${extraOk ? `<i style="flex:${extraOk};background:var(--okbar)"></i>` : ""}
-        ${!extraRows.length ? `<i style="flex:1;background:var(--line)"></i>` : ""}
-      </div>
-      <span class="col-l font-semibold" style="color:#7c3aed">นอก Zone</span>
-    </button>
   </div>`;
 
   const selectedZoneDetailHtml = (() => {
@@ -1434,7 +1429,7 @@ function vStat() {
   <div class="dblk" id="dblk2"><section class="card p-4 mb-4">
     <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
       <h2 class="font-semibold">สรุปจำนวนที่ตรวจสอบแยกตาม 13 Zone ตามผลตรวจและสถานะ</h2>
-      <span class="text-xs no-cap" style="color:var(--muted)">ยอดตรวจทั้งหมด (Z1–Z13 + นอก Zone) · คลิกแท่งเพื่อดูรายการ</span>
+      <span class="text-xs no-cap" style="color:var(--muted)">ยอดตรวจทั้งหมด (Z1–Z13 · 49 จุดตรวจ) · คลิกแท่งเพื่อดูรายการ</span>
     </div>
     ${legendFull}${zone13ChartHtml}${selectedZoneDetailHtml}${typePanelHtml}
   </section></div>
@@ -1549,7 +1544,16 @@ V.addEventListener("change", e => {
   if (t.dataset.addfile) { addPhotos(t.dataset.addfile, t.files); t.value = ""; return; }
   if (!f) {
     if (t.id === "fst") { fst = t.value; render(); }
-    else if (t.id === "fz") { fz = t.value; render(); }
+    else if (t.id === "fz") {
+      fz = t.value;
+      if (fz && fa) {
+        const zObj = ZONE_MASTER.find(z => z.id === fz);
+        const normCheck = s => String(s || "").replace(/\s+/g, " ").replace(/\s*\/\s*/g, "/").trim().toLowerCase();
+        const inMaster = zObj && zObj.points.some(p => normCheck(p) === normCheck(fa));
+        if (!inMaster) fa = "";
+      }
+      render();
+    }
     else if (t.id === "fa") { fa = t.value; render(); }
     else if (t.id === "statSel") { statKey = t.value; render(); }
     else if (t.id === "tDateSel") { tDate = t.value; render(); }
